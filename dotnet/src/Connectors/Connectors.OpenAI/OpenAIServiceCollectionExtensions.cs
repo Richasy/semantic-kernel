@@ -659,6 +659,7 @@ public static class OpenAIServiceCollectionExtensions
     /// <param name="serviceId">A local identifier for the given AI service</param>
     /// <param name="modelId">Model identifier, see https://learn.microsoft.com/azure/cognitive-services/openai/quickstart</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
+    /// <param name="apiVersion">Api version.</param>
     /// <returns>The same instance as <paramref name="builder"/>.</returns>
     public static IKernelBuilder AddAzureOpenAIChatCompletion(
         this IKernelBuilder builder,
@@ -667,7 +668,8 @@ public static class OpenAIServiceCollectionExtensions
         string apiKey,
         string? serviceId = null,
         string? modelId = null,
-        HttpClient? httpClient = null)
+        HttpClient? httpClient = null,
+        OpenAIClientOptions.ServiceVersion? apiVersion = null)
     {
         Verify.NotNull(builder);
         Verify.NotNullOrWhiteSpace(deploymentName);
@@ -679,7 +681,8 @@ public static class OpenAIServiceCollectionExtensions
             OpenAIClient client = CreateAzureOpenAIClient(
                 endpoint,
                 new AzureKeyCredential(apiKey),
-                HttpClientProvider.GetHttpClient(httpClient, serviceProvider));
+                HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
+                apiVersion);
 
             return new(deploymentName, client, modelId, serviceProvider.GetService<ILoggerFactory>());
         };
@@ -1091,7 +1094,6 @@ public static class OpenAIServiceCollectionExtensions
     /// <param name="serviceId">A local identifier for the given AI service</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
     /// <returns>The same instance as <paramref name="builder"/>.</returns>
-    [Experimental("SKEXP0010")]
     public static IKernelBuilder AddOpenAIChatCompletion(
         this IKernelBuilder builder,
         string modelId,
@@ -1996,8 +1998,8 @@ public static class OpenAIServiceCollectionExtensions
 
     #endregion
 
-    private static OpenAIClient CreateAzureOpenAIClient(string endpoint, AzureKeyCredential credentials, HttpClient? httpClient) =>
-        new(new Uri(endpoint), credentials, ClientCore.GetOpenAIClientOptions(httpClient));
+    private static OpenAIClient CreateAzureOpenAIClient(string endpoint, AzureKeyCredential credentials, HttpClient? httpClient, OpenAIClientOptions.ServiceVersion? apiVersion = null) =>
+        new(new Uri(endpoint), credentials, ClientCore.GetOpenAIClientOptions(httpClient, apiVersion));
 
     private static OpenAIClient CreateAzureOpenAIClient(string endpoint, TokenCredential credentials, HttpClient? httpClient) =>
         new(new Uri(endpoint), credentials, ClientCore.GetOpenAIClientOptions(httpClient));

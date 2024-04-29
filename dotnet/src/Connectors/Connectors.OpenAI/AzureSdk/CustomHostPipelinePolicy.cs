@@ -22,6 +22,8 @@ internal class CustomHostPipelinePolicy : HttpPipelineSynchronousPolicy
         }
 
         // Update current host to provided endpoint
-        message.Request.Uri.Reset(this._endpoint);
+        var uri = message.Request.Uri.ToString();
+        var newUrl = uri.Replace("https://api.openai.com/v1", this._endpoint.ToString().TrimEnd('/'));
+        message.Request.Uri.Reset(new Uri(newUrl));
     }
 }

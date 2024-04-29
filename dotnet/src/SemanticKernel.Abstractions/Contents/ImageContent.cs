@@ -67,6 +67,7 @@ public sealed class ImageContent : KernelContent
         }
 
         this.Data = data;
+        this.Uri = new Uri(this.BuildDataUri());
     }
 
     /// <summary>

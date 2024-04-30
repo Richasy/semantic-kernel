@@ -27,7 +27,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
     private readonly string _apiKey;
     private readonly string _apiSecret;
     private readonly Uri _chatGenerationEndpoint;
-    private QianFanTokenContext _token;
+    private QianFanTokenContext? _token;
 
     private static readonly string s_namespace = typeof(QianFanChatCompletionClient).Namespace!;
 
@@ -134,7 +134,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
         {
             state.QianFanRequest.Stream = true;
             await this.EnsureAuthTokenAsync().ConfigureAwait(false);
-            using var httpRequestMessage = this.CreateHttpRequest(state.QianFanRequest, this._chatGenerationEndpoint, this._token.Token.AccessToken!);
+            using var httpRequestMessage = this.CreateHttpRequest(state.QianFanRequest, this._chatGenerationEndpoint, this._token!.Token.AccessToken!);
             using var response = await this.SendRequestAndGetResponseImmediatelyAfterHeadersReadAsync(httpRequestMessage, cancellationToken)
                 .ConfigureAwait(false);
             using var responseStream = await response.Content.ReadAsStreamAndTranslateExceptionAsync()
@@ -204,7 +204,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
         CancellationToken cancellationToken)
     {
         await this.EnsureAuthTokenAsync().ConfigureAwait(false);
-        using var httpRequestMessage = this.CreateHttpRequest(qianFanRequest, endpoint, this._token.Token.AccessToken!);
+        using var httpRequestMessage = this.CreateHttpRequest(qianFanRequest, endpoint, this._token!.Token.AccessToken!);
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
         var qianFanResponse = DeserializeResponse<QianFanResponse>(body);

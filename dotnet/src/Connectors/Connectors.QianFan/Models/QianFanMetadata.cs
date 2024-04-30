@@ -43,48 +43,72 @@ public sealed class QianFanMetadata : ReadOnlyDictionary<string, object?>
         internal init => this.SetValueInDictionary(value, nameof(this.SentenceId));
     }
 
+    /// <summary>
+    /// Response is end.
+    /// </summary>
     public bool IsEnd
     {
         get => (this.GetValueFromDictionary(nameof(this.IsEnd)) as bool?) ?? false;
         internal init => this.SetValueInDictionary(value, nameof(this.IsEnd));
     }
 
+    /// <summary>
+    /// Response is truncated.
+    /// </summary>
     public bool IsTruncated
     {
         get => (this.GetValueFromDictionary(nameof(this.IsTruncated)) as bool?) ?? false;
         internal init => this.SetValueInDictionary(value, nameof(this.IsTruncated));
     }
 
+    /// <summary>
+    /// For some reason, the session should clear the history.
+    /// </summary>
     public bool NeedClearHistory
     {
         get => (this.GetValueFromDictionary(nameof(this.NeedClearHistory)) as bool?) ?? false;
         internal init => this.SetValueInDictionary(value, nameof(this.NeedClearHistory));
     }
 
+    /// <summary>
+    /// The flag of the response.
+    /// </summary>
     public int Flag
     {
         get => (this.GetValueFromDictionary(nameof(this.Flag)) as int?) ?? 0;
         internal init => this.SetValueInDictionary(value, nameof(this.Flag));
     }
 
+    /// <summary>
+    /// The round of the ban.
+    /// </summary>
     public int BanRound
     {
         get => (this.GetValueFromDictionary(nameof(this.BanRound)) as int?) ?? 0;
         internal init => this.SetValueInDictionary(value, nameof(this.BanRound));
     }
 
+    /// <summary>
+    /// The token count of the prompt.
+    /// </summary>
     public int PromptTokenCount
     {
         get => (this.GetValueFromDictionary(nameof(this.PromptTokenCount)) as int?) ?? 0;
         internal init => this.SetValueInDictionary(value, nameof(this.PromptTokenCount));
     }
 
+    /// <summary>
+    /// The token count of the response.
+    /// </summary>
     public int CompletionTokenCount
     {
         get => (this.GetValueFromDictionary(nameof(this.CompletionTokenCount)) as int?) ?? 0;
         internal init => this.SetValueInDictionary(value, nameof(this.CompletionTokenCount));
     }
 
+    /// <summary>
+    /// The total token count.
+    /// </summary>
     public int TotalTokenCount
     {
         get => (this.GetValueFromDictionary(nameof(this.TotalTokenCount)) as int?) ?? 0;

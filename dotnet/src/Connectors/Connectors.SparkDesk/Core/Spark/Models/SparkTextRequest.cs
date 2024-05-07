@@ -17,7 +17,7 @@ internal sealed class SparkTextRequest
     [JsonPropertyName("payload")]
     public SparkRequestPayload? Payload { get; set; }
 
-    public void AddFunction(SparkFunction function)
+    public void AddFunction(SparkDeskFunction function)
     {
         this.Payload ??= new SparkRequestPayload();
         this.Payload.Functions ??= new SparkTool();

@@ -61,7 +61,7 @@ public abstract class SparkDeskToolCallBehavior
     /// The <see cref="SparkDeskToolCallBehavior"/> that may be set into <see cref="SparkDeskToolCallBehavior"/>
     /// to indicate that the specified functions should be made available to the model.
     /// </returns>
-    public static SparkDeskToolCallBehavior EnableFunctions(IEnumerable<SparkFunction> functions, bool autoInvoke = false)
+    public static SparkDeskToolCallBehavior EnableFunctions(IEnumerable<SparkDeskFunction> functions, bool autoInvoke = false)
     {
         Verify.NotNull(functions);
         return new EnabledFunctions(functions, autoInvoke);
@@ -138,7 +138,7 @@ public abstract class SparkDeskToolCallBehavior
         /// </summary>
         /// <param name="metadata">The <see cref="KernelFunctionMetadata"/> object to convert.</param>
         /// <returns>An <see cref="SparkDeskFunction"/> object.</returns>
-        private static SparkFunction FunctionMetadataAsSparkDeskFunction(KernelFunctionMetadata metadata)
+        private static SparkDeskFunction FunctionMetadataAsSparkDeskFunction(KernelFunctionMetadata metadata)
         {
             IReadOnlyList<KernelParameterMetadata> metadataParams = metadata.Parameters;
 
@@ -155,7 +155,7 @@ public abstract class SparkDeskToolCallBehavior
                     param.Schema);
             }
 
-            return new SparkFunction(
+            return new SparkDeskFunction(
                 metadata.PluginName,
                 metadata.Name,
                 metadata.Description,
@@ -176,9 +176,9 @@ public abstract class SparkDeskToolCallBehavior
     /// <summary>
     /// Represents a <see cref="SparkDeskToolCallBehavior"/> that provides a specified list of functions to the model.
     /// </summary>
-    internal sealed class EnabledFunctions(IEnumerable<SparkFunction> functions, bool autoInvoke) : SparkDeskToolCallBehavior(autoInvoke)
+    internal sealed class EnabledFunctions(IEnumerable<SparkDeskFunction> functions, bool autoInvoke) : SparkDeskToolCallBehavior(autoInvoke)
     {
-        private readonly SparkFunction[] _functions = functions.ToArray();
+        private readonly SparkDeskFunction[] _functions = functions.ToArray();
 
         public override string ToString() =>
             $"{nameof(EnabledFunctions)}(autoInvoke:{this.MaximumAutoInvokeAttempts != 0}): " +

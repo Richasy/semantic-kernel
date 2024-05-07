@@ -25,11 +25,11 @@ public sealed class SparkFunctionToolCall
         string functionName = fullyQualifiedFunctionName;
         string? pluginName = null;
 
-        int separatorPos = fullyQualifiedFunctionName.IndexOf(SparkFunction.NameSeparator, StringComparison.Ordinal);
+        int separatorPos = fullyQualifiedFunctionName.IndexOf(SparkDeskFunction.NameSeparator, StringComparison.Ordinal);
         if (separatorPos >= 0)
         {
             pluginName = fullyQualifiedFunctionName.AsSpan(0, separatorPos).Trim().ToString();
-            functionName = fullyQualifiedFunctionName.AsSpan(separatorPos + SparkFunction.NameSeparator.Length).Trim().ToString();
+            functionName = fullyQualifiedFunctionName.AsSpan(separatorPos + SparkDeskFunction.NameSeparator.Length).Trim().ToString();
         }
 
         this._fullyQualifiedFunctionName = fullyQualifiedFunctionName;
@@ -53,12 +53,12 @@ public sealed class SparkFunctionToolCall
     /// <summary>Gets the fully-qualified name of the function.</summary>
     /// <remarks>
     /// This is the concatenation of the <see cref="PluginName"/> and the <see cref="FunctionName"/>,
-    /// separated by <see cref="SparkFunction.NameSeparator"/>. If there is no <see cref="PluginName"/>,
+    /// separated by <see cref="SparkDeskFunction.NameSeparator"/>. If there is no <see cref="PluginName"/>,
     /// this is the same as <see cref="FunctionName"/>.
     /// </remarks>
     public string FullyQualifiedName
         => this._fullyQualifiedFunctionName
-            ??= string.IsNullOrEmpty(this.PluginName) ? this.FunctionName : $"{this.PluginName}{SparkFunction.NameSeparator}{this.FunctionName}";
+            ??= string.IsNullOrEmpty(this.PluginName) ? this.FunctionName : $"{this.PluginName}{SparkDeskFunction.NameSeparator}{this.FunctionName}";
 
     /// <inheritdoc/>
     public override string ToString()

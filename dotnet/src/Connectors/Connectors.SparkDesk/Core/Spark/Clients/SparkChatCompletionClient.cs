@@ -2,7 +2,6 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
@@ -112,17 +111,14 @@ internal sealed class SparkChatCompletionClient : ClientBase
         var state = this.ValidateInputAndCreateChatCompletionState(chatHistory, kernel, executionSettings);
         var chatMessageContents = new List<ChatMessageContent>();
 
-        for (state.Iteration = 1; ; state.Iteration++)
+        await foreach (var res in this.StreamGenerateChatMessageAsync(chatHistory, executionSettings, kernel, cancellationToken).ConfigureAwait(false))
         {
-            await foreach (var res in this.StreamGenerateChatMessageAsync(chatHistory, executionSettings, kernel, cancellationToken).ConfigureAwait(false))
-            {
-                var r = res as SparkStreamingChatMessageContent;
-                chatMessageContents.Add(new SparkChatMessageContent(res.Role ?? AuthorRole.Assistant, res.Content, res.ModelId ?? this._version.ToString(), r.CalledToolResult, r.Metadata));
-            }
-
-            var contents = string.Join(string.Empty, chatMessageContents.Select(p => p.Content));
-            return new List<ChatMessageContent> { new SparkChatMessageContent(AuthorRole.Assistant, contents, this._version.ToString()) };
+            var r = res as SparkStreamingChatMessageContent;
+            chatMessageContents.Add(new SparkChatMessageContent(res.Role ?? AuthorRole.Assistant, res.Content, res.ModelId ?? this._version.ToString(), r!.CalledToolResult, r.Metadata));
         }
+
+        var contents = string.Join(string.Empty, chatMessageContents.Select(p => p.Content));
+        return new List<ChatMessageContent> { new SparkChatMessageContent(AuthorRole.Assistant, contents, this._version.ToString()) };
     }
 
     public async IAsyncEnumerable<StreamingChatMessageContent> StreamGenerateChatMessageAsync(
@@ -237,7 +233,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
         }
 
         // Clear the tools. If we end up wanting to use tools, we'll reset it to the desired value.
-        state.TextRequest.Payload.Functions.Functions = null;
+        state!.TextRequest!.Payload!.Functions!.Functions = default;
 
         if (state.Iteration >= state.ExecutionSettings.ToolCallBehavior!.MaximumUseAttempts)
         {
@@ -267,7 +263,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
         // then we don't need to check this, as it'll be handled when we look up the function in the kernel to be able
         // to invoke it. If we're permitting only a specific list of functions, though, then we need to explicitly check.
         if (state.ExecutionSettings.ToolCallBehavior?.AllowAnyRequestedKernelFunction is not true &&
-            !IsRequestableTool(state.TextRequest.Payload.Functions.Functions, toolCall))
+            !IsRequestableTool(state!.TextRequest!.Payload!.Functions!.Functions!, toolCall))
         {
             this.AddToolResponseMessage(state.ChatHistory, state.TextRequest, toolCall, functionResponse: null,
                 "Error: Function call request for a function that wasn't defined.");

@@ -66,15 +66,15 @@ public sealed class SparkFunctionReturnParameter
 /// <summary>
 /// Represents a function that can be passed to the Spark API
 /// </summary>
-public sealed class SparkFunction
+public sealed class SparkDeskFunction
 {
     /// <summary>
     /// Cached schema for a description less string.
     /// </summary>
     private static readonly KernelJsonSchema s_stringNoDescriptionSchema = KernelJsonSchema.Parse("{\"type\":\"string\"}");
 
-    /// <summary>Initializes the <see cref="SparkFunction"/>.</summary>
-    internal SparkFunction(
+    /// <summary>Initializes the <see cref="SparkDeskFunction"/>.</summary>
+    internal SparkDeskFunction(
         string? pluginName,
         string functionName,
         string? description,
@@ -119,7 +119,7 @@ public sealed class SparkFunction
     public SparkFunctionReturnParameter? ReturnParameter { get; }
 
     /// <summary>
-    /// Converts the <see cref="SparkFunction"/> representation to the Spark API's
+    /// Converts the <see cref="SparkDeskFunction"/> representation to the Spark API's
     /// <see cref="SparkTool.FunctionDeclaration"/> representation.
     /// </summary>
     /// <returns>A <see cref="SparkTool.FunctionDeclaration"/> containing all the function information.</returns>

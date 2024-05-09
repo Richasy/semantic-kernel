@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -111,18 +112,14 @@ internal sealed class SparkChatCompletionClient : ClientBase
     {
         var state = this.ValidateInputAndCreateChatCompletionState(chatHistory, kernel, executionSettings);
         var chatMessageContents = new List<ChatMessageContent>();
-
-        for (state.Iteration = 1; ; state.Iteration++)
+        await foreach (var res in this.StreamGenerateChatMessageAsync(chatHistory, executionSettings, kernel, cancellationToken).ConfigureAwait(false))
         {
-            await foreach (var res in this.StreamGenerateChatMessageAsync(chatHistory, executionSettings, kernel, cancellationToken).ConfigureAwait(false))
-            {
-                var r = res as SparkStreamingChatMessageContent;
-                chatMessageContents.Add(new SparkChatMessageContent(res.Role ?? AuthorRole.Assistant, res.Content, res.ModelId ?? this._version.ToString(), r.CalledToolResult, r.Metadata));
-            }
-
-            var contents = string.Join(string.Empty, chatMessageContents.Select(p => p.Content));
-            return new List<ChatMessageContent> { new SparkChatMessageContent(AuthorRole.Assistant, contents, this._version.ToString()) };
+            var r = res as SparkStreamingChatMessageContent;
+            chatMessageContents.Add(new SparkChatMessageContent(res.Role ?? AuthorRole.Assistant, res.Content, res.ModelId ?? this._version.ToString(), r.CalledToolResult, r.Metadata));
         }
+
+        var contents = string.Join(string.Empty, chatMessageContents.Select(p => p.Content));
+        return [new SparkChatMessageContent(AuthorRole.Assistant, contents, this._version.ToString())];
     }
 
     public async IAsyncEnumerable<StreamingChatMessageContent> StreamGenerateChatMessageAsync(
@@ -131,20 +128,79 @@ internal sealed class SparkChatCompletionClient : ClientBase
         Kernel? kernel = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        using var socket = new ClientWebSocket();
         var state = this.ValidateInputAndCreateChatCompletionState(chatHistory, kernel, executionSettings);
-        await socket.ConnectAsync(this._chatStreamingEndpoint, cancellationToken).ConfigureAwait(false);
 
-        var json = JsonSerializer.Serialize(state.TextRequest);
-        ArraySegment<byte> messageBuffer = new(JsonSerializer.SerializeToUtf8Bytes(state.TextRequest));
-        await socket.SendAsync(messageBuffer, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
+        for (state.Iteration = 1; ; state.Iteration++)
+        {
+            using var socket = new ClientWebSocket();
+            await socket.ConnectAsync(this._chatStreamingEndpoint, cancellationToken).ConfigureAwait(false);
 
+            if (!state.AutoInvoke)
+            {
+                state.TextRequest.Payload!.Functions = null;
+            }
+
+            var json = JsonSerializer.Serialize(state.TextRequest);
+            ArraySegment<byte> messageBuffer = new(JsonSerializer.SerializeToUtf8Bytes(state.TextRequest));
+            await socket.SendAsync(messageBuffer, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
+
+            await foreach (var messageContent in this.GetStreamingChatMessageContentsOrPopulateStateForToolCallingAsync(state, socket, cancellationToken).ConfigureAwait(false))
+            {
+                yield return messageContent;
+            }
+
+            if (!state.AutoInvoke)
+            {
+                yield break;
+            }
+
+            Verify.NotNull(state.ExecutionSettings.ToolCallBehavior);
+            state.AddLastMessageToChatHistoryAndRequest();
+            await this.ProcessFunctionsAsync(state, cancellationToken).ConfigureAwait(false);
+            state.AutoInvoke = false;
+        }
+    }
+
+    private async IAsyncEnumerable<StreamingChatMessageContent> GetStreamingChatMessageContentsOrPopulateStateForToolCallingAsync(
+        ChatCompletionState state,
+        ClientWebSocket socket,
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        var chatResponsesEnumerable = this.ProcessChatResponseStreamAsync(socket, ct);
+        IAsyncEnumerator<SparkTextResponse> chatResponseEnumerator = null!;
+        try
+        {
+            chatResponseEnumerator = chatResponsesEnumerable.GetAsyncEnumerator(ct);
+            while (await chatResponseEnumerator.MoveNextAsync().ConfigureAwait(false))
+            {
+                var messageContent = chatResponseEnumerator.Current;
+                if (state.AutoInvoke && messageContent.Payload?.Choices?.Text?.FirstOrDefault()?.FunctionCall is not null)
+                {
+                    state.LastMessage = this.ProcessChatResponse(messageContent)[0];
+                    yield break;
+                }
+
+                state.AutoInvoke = false;
+
+                yield return this.GetStreamingChatContentFromChatContent(this.ProcessChatResponse(messageContent)[0]);
+            }
+        }
+        finally
+        {
+            if (chatResponseEnumerator != null)
+            {
+                await chatResponseEnumerator.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+    }
+
+    private async IAsyncEnumerable<SparkTextResponse> ProcessChatResponseStreamAsync(ClientWebSocket socket, [EnumeratorCancellation] CancellationToken ct)
+    {
         var buffer = new byte[4096];
-
         do
         {
             var arraySegment = new ArraySegment<byte>(buffer);
-            var result = await socket.ReceiveAsync(arraySegment, cancellationToken).ConfigureAwait(false);
+            var result = await socket.ReceiveAsync(arraySegment, ct).ConfigureAwait(false);
             if (result.MessageType == WebSocketMessageType.Text)
             {
                 var stream = new MemoryStream(buffer, 0, result.Count);
@@ -154,25 +210,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
                     throw new KernelException($"Spark exception: {response?.Header?.Message}");
                 }
 
-                var messageContent = this.ProcessChatResponse(response)[0];
-                if (state.AutoInvoke && messageContent.ToolCalls is not null)
-                {
-                    // If function call was returned there is no more data in stream
-                    state.LastMessage = messageContent;
-
-                    // ToolCallBehavior is not null because we are in auto-invoke mode but we check it again to be sure it wasn't changed in the meantime
-                    Verify.NotNull(state.ExecutionSettings.ToolCallBehavior);
-
-                    state.AddLastMessageToChatHistoryAndRequest();
-                    await this.ProcessFunctionsAsync(state, cancellationToken).ConfigureAwait(false);
-                    break;
-                }
-
-                // We disable auto-invoke because the first message in the stream doesn't contain ToolCalls or auto-invoke is already false
-                state.AutoInvoke = false;
-
-                // If we don't want to attempt to invoke any functions, just return the result.
-                yield return this.GetStreamingChatContentFromChatContent(messageContent);
+                yield return response;
 
                 if (response.Header.Status == 2)
                 {
@@ -183,12 +221,8 @@ internal sealed class SparkChatCompletionClient : ClientBase
             {
                 throw new KernelException($"Unexpected websocket message type: {result.MessageType}");
             }
-        } while (!cancellationToken.IsCancellationRequested);
 
-        if (socket.State == WebSocketState.Open)
-        {
-            await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Normal closure", cancellationToken).ConfigureAwait(false);
-        }
+        } while (!ct.IsCancellationRequested);
     }
 
     private ChatCompletionState ValidateInputAndCreateChatCompletionState(
@@ -238,7 +272,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
         }
 
         // Clear the tools. If we end up wanting to use tools, we'll reset it to the desired value.
-        state.TextRequest.Payload.Functions.Functions = null;
+        state.TextRequest.Payload!.Functions!.Functions = null;
 
         if (state.Iteration >= state.ExecutionSettings.ToolCallBehavior!.MaximumUseAttempts)
         {
@@ -268,7 +302,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
         // then we don't need to check this, as it'll be handled when we look up the function in the kernel to be able
         // to invoke it. If we're permitting only a specific list of functions, though, then we need to explicitly check.
         if (state.ExecutionSettings.ToolCallBehavior?.AllowAnyRequestedKernelFunction is not true &&
-            !IsRequestableTool(state.TextRequest.Payload.Functions.Functions, toolCall))
+            !IsRequestableTool(state.TextRequest.Payload!.Functions!.Functions!, toolCall))
         {
             this.AddToolResponseMessage(state.ChatHistory, state.TextRequest, toolCall, functionResponse: null,
                 "Error: Function call request for a function that wasn't defined.");
@@ -333,8 +367,13 @@ internal sealed class SparkChatCompletionClient : ClientBase
             modelId: this._version.ToString(),
             calledToolResult: functionResponse != null ? new(tool, functionResponse) : null,
             metadata: null);
-        chat.Add(message);
+
         request.AddChatMessage(message);
+        chat.Clear();
+        foreach (var msg in request.Payload!.Message!.Text!)
+        {
+            chat.AddMessage(msg.Role!.Value, msg.Content ?? string.Empty);
+        }
     }
 
     private List<SparkChatMessageContent> ProcessChatResponse(SparkTextResponse sparkResponse)

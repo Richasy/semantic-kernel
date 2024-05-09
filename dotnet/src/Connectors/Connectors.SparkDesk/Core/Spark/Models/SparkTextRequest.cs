@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -31,7 +32,26 @@ internal sealed class SparkTextRequest
         Verify.NotNull(this.Payload?.Message?.Text);
         Verify.NotNull(message);
 
-        this.Payload.Message.Text.Add(CreateSparkTextMessageFromChatMessage(message));
+        if (message.Role == AuthorRole.Tool)
+        {
+            // 2024.05.09
+            // 由于星火模型不支持 Tool 角色，所以我们需要将 Tool 角色的消息转换为用户消息并要求模型转述（实际效果并不好，还是建议别用）
+            var chatList = this.Payload.Message.Text;
+            chatList.RemoveAt(chatList.Count - 1);
+            var sparkMessage = (SparkChatMessageContent)message;
+            var toolMessage = sparkMessage.CalledToolResult!.FunctionResult.ToString();
+            var userMessage = new SparkMessage.SparkTextMessage
+            {
+                Role = AuthorRole.User,
+                Content = $"Output this: {toolMessage}",
+            };
+
+            chatList.Add(userMessage);
+        }
+        else if (!string.IsNullOrEmpty(message.Content))
+        {
+            this.Payload.Message.Text.Add(CreateSparkTextMessageFromChatMessage(message));
+        }
     }
 
     public static SparkTextRequest FromChatHistoryAndExecutionSettings(

@@ -61,7 +61,7 @@ internal sealed class SparkTextResponse
         /// </summary>
         [JsonPropertyName("text")]
         [JsonRequired]
-        public IList<SparkResponseTextChoice> Text { get; set; }
+        public IList<SparkResponseTextChoice>? Text { get; set; }
     }
 
     internal sealed class SparkResponseTextUsage

@@ -16,7 +16,6 @@ internal sealed class SparkTextResponse
     [JsonPropertyName("payload")]
     public SparkTextResponsePayload? Payload { get; set; }
 
-
     internal sealed class SparkTextResponseHeader
     {
         [JsonPropertyName("code")]

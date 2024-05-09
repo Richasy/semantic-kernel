@@ -23,14 +23,14 @@ public sealed class SparkTool
     /// a [FunctionResponse][content.part.function_response] with the [content.role] "function" generation context for the next model turn.
     /// </remarks>
     [JsonPropertyName("text")]
-    internal IList<FunctionDeclaration> Functions { get; set; } = [];
+    public IList<FunctionDeclaration> Functions { get; set; } = [];
 
     /// <summary>
     /// Structured representation of a function declaration as defined by the OpenAPI 3.03 specification.
     /// Included in this declaration are the function name and parameters.
     /// This FunctionDeclaration is a representation of a block of code that can be used as a Tool by the model and executed by the client.
     /// </summary>
-    internal sealed class FunctionDeclaration
+    public sealed class FunctionDeclaration
     {
         /// <summary>
         /// Required. Name of function.

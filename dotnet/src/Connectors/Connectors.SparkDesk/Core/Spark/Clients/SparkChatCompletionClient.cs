@@ -135,6 +135,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
         var state = this.ValidateInputAndCreateChatCompletionState(chatHistory, kernel, executionSettings);
         await socket.ConnectAsync(this._chatStreamingEndpoint, cancellationToken).ConfigureAwait(false);
 
+        var json = JsonSerializer.Serialize(state.TextRequest);
         ArraySegment<byte> messageBuffer = new(JsonSerializer.SerializeToUtf8Bytes(state.TextRequest));
         await socket.SendAsync(messageBuffer, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
 

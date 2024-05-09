@@ -35,7 +35,7 @@ public sealed class SparkFunctionToolCall
         this._fullyQualifiedFunctionName = fullyQualifiedFunctionName;
         this.PluginName = pluginName;
         this.FunctionName = functionName;
-        if (functionToolCall.Arguments is not null)
+        if (functionToolCall.Arguments is not null && functionToolCall.Arguments.ToString() != "{}")
         {
             this.Arguments = functionToolCall.Arguments.Deserialize<Dictionary<string, object?>>();
         }

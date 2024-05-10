@@ -115,7 +115,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
         await foreach (var res in this.StreamGenerateChatMessageAsync(chatHistory, executionSettings, kernel, cancellationToken).ConfigureAwait(false))
         {
             var r = res as SparkStreamingChatMessageContent;
-            chatMessageContents.Add(new SparkChatMessageContent(res.Role ?? AuthorRole.Assistant, res.Content, res.ModelId ?? this._version.ToString(), r.CalledToolResult, r.Metadata));
+            chatMessageContents.Add(new SparkChatMessageContent(res.Role ?? AuthorRole.Assistant, res.Content, res.ModelId ?? this._version.ToString(), r!.CalledToolResult, r.Metadata));
         }
 
         var contents = string.Join(string.Empty, chatMessageContents.Select(p => p.Content));
@@ -221,7 +221,6 @@ internal sealed class SparkChatCompletionClient : ClientBase
             {
                 throw new KernelException($"Unexpected websocket message type: {result.MessageType}");
             }
-
         } while (!ct.IsCancellationRequested);
     }
 

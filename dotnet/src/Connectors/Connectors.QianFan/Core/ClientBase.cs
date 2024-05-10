@@ -3,7 +3,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Http;
-using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;

@@ -28,7 +28,7 @@ public class QianFanPromptExecutionSettings : PromptExecutionSettings
     /// <summary>
     /// Default max tokens for a text generation.
     /// </summary>
-    public static int DefaultTextMaxTokens { get; } = 256;
+    public static int DefaultTextMaxTokens { get; } = 512;
 
     /// <summary>
     /// Temperature controls the randomness of the completion.

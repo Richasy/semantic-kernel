@@ -3,24 +3,20 @@
 using Microsoft.SemanticKernel.ChatCompletion;
 using System.Text.Json.Serialization;
 
-namespace Microsoft.SemanticKernel.Connectors.QianFan.Core;
+namespace Microsoft.SemanticKernel.Connectors.HunYuan.Core;
 
-internal sealed class QianFanMessageContent
+internal sealed class HunYuanMessageContent
 {
     /// <summary>
-    /// The producer of the content. Must be either 'user' or 'assisant'.
+    /// The producer of the content. Must be either 'user' or 'assistant' or 'system'.
     /// </summary>
     /// <remarks>Useful to set for multi-turn conversations, otherwise can be left blank or unset.</remarks>
-    [JsonPropertyName("role")]
+    [JsonPropertyName("Role")]
     [JsonConverter(typeof(AuthorRoleConverter))]
     [JsonRequired]
     public AuthorRole? Role { get; set; }
 
-    [JsonPropertyName("content")]
+    [JsonPropertyName("Content")]
     [JsonRequired]
     public string? Content { get; set; }
-
-    [JsonPropertyName("name")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Name { get; set; }
 }

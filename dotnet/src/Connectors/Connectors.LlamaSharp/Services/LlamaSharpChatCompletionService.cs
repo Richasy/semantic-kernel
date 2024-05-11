@@ -8,12 +8,10 @@ using LLama.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Services;
-using LLama.Abstractions;
 using Microsoft.SemanticKernel.Connectors.LlamaSharp.Core;
 using static LLama.LLamaTransforms;
 using System.Text;
 using System.Runtime.CompilerServices;
-using System.IO;
 
 namespace Microsoft.SemanticKernel.Connectors.LlamaSharp;
 
@@ -25,8 +23,8 @@ public sealed class LlamaSharpChatCompletionService : IChatCompletionService
     private readonly Dictionary<string, object?> _attributesInternal = [];
     private readonly LLamaContext _context;
     private readonly InteractiveExecutor _interactiveExecutor;
-    private readonly IHistoryTransform _historyTransform;
-    private readonly KeywordTextOutputStreamTransform _outputTransform;
+    private BasicHistoryTransform _historyTransform;
+    private KeywordTextOutputStreamTransform _outputTransform;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LlamaSharpChatCompletionService"/> class.
@@ -48,8 +46,9 @@ public sealed class LlamaSharpChatCompletionService : IChatCompletionService
         using var model = LLamaWeights.LoadFromFile(parameters);
         this._context = model.CreateContext(parameters, loggerFactory?.CreateLogger<LlamaSharpChatCompletionService>());
         this._interactiveExecutor = new InteractiveExecutor(this._context);
-        this._historyTransform = this.GetHistoryTransform(modelPath);
-        this._outputTransform = new KeywordTextOutputStreamTransform(this.GetKeywords(modelPath));
+        var historyTransform = new BasicHistoryTransform();
+        this._historyTransform = historyTransform;
+        this._outputTransform = new KeywordTextOutputStreamTransform(historyTransform.Keywords!);
         this._attributesInternal.Add(AIServiceExtensions.ModelIdKey, modelPath);
     }
 
@@ -80,6 +79,15 @@ public sealed class LlamaSharpChatCompletionService : IChatCompletionService
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var settings = LlamaSharpPromptExecutionSettings.FromExecutionSettings(executionSettings);
+        if (!string.IsNullOrEmpty(settings.SystemTemplate)
+            || !string.IsNullOrEmpty(settings.UserTemplate)
+            || !string.IsNullOrEmpty(settings.AssistantTemplate))
+        {
+            var historyTransform = new BasicHistoryTransform(settings.SystemTemplate, settings.UserTemplate, settings.AssistantTemplate);
+            this._outputTransform = new KeywordTextOutputStreamTransform(historyTransform.Keywords!);
+            this._historyTransform = historyTransform;
+        }
+
         var prompt = this.GetFormattedPrompt(chatHistory);
         var result = this._interactiveExecutor.InferAsync(prompt, settings.ToLLamaSharpInferenceParams(), cancellationToken);
         var output = this._outputTransform.TransformAsync(result);
@@ -102,36 +110,5 @@ public sealed class LlamaSharpChatCompletionService : IChatCompletionService
         string prompt;
         prompt = this._historyTransform.HistoryToText(chatHistory.ToLLamaSharpChatHistory());
         return prompt;
-    }
-
-    private IHistoryTransform GetHistoryTransform(string modelPath)
-    {
-        var modelType = this.GetModelTemplateType(modelPath);
-        return modelType switch
-        {
-            ModelTemplateType.Phi => new PhiHistoryTransform(),
-            _ => new BasicHistoryTransform(),
-        };
-    }
-
-    private IEnumerable<string> GetKeywords(string modelPath)
-    {
-        var modelType = this.GetModelTemplateType(modelPath);
-        return modelType switch
-        {
-            ModelTemplateType.Phi => PhiHistoryTransform.Keywrods,
-            _ => BasicHistoryTransform.Keywrods,
-        };
-    }
-
-    private ModelTemplateType GetModelTemplateType(string modelPath)
-    {
-        var modelName = Path.GetFileNameWithoutExtension(modelPath);
-        if (modelName.StartsWith("phi", System.StringComparison.InvariantCultureIgnoreCase))
-        {
-            return ModelTemplateType.Phi;
-        }
-
-        return ModelTemplateType.Basic;
     }
 }

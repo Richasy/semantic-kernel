@@ -9,60 +9,85 @@ namespace Microsoft.SemanticKernel.Connectors.LlamaSharp.Core;
 
 internal sealed class BasicHistoryTransform : IHistoryTransform
 {
-    private const string START_PREFIX = "<|im_start|>";
-    private const string END_SUFFIX = "<|im_end|>";
-    private const string SYSTEM_PREFIX = "system";
-    private const string USER_PREFIX = "user";
-    private const string ASSISTANT_PREFIX = "assistant";
+    private readonly string _systemTemplate;
+    private readonly string _userTemplate;
+    private readonly string _assistantTemplate;
 
-    public static IEnumerable<string> Keywrods => [USER_PREFIX, ASSISTANT_PREFIX, SYSTEM_PREFIX, START_PREFIX, END_SUFFIX];
+    public BasicHistoryTransform(string? systemTemplate = default, string? userTemplate = default, string? assistantTemplate = default)
+    {
+        this._systemTemplate = systemTemplate ?? "System: {{system}}\n";
+        this._userTemplate = userTemplate ?? "User: {{user}}\n";
+        this._assistantTemplate = assistantTemplate ?? "Assistant: {{assistant}}\n";
+
+        var keywords = new List<string>();
+        AddKeywords(this._systemTemplate, "{{system}}");
+        AddKeywords(this._userTemplate, "{{user}}");
+        AddKeywords(this._assistantTemplate, "{{assistant}}");
+        this.Keywords = keywords;
+
+        void AddKeywords(string template, string splitKey)
+        {
+            if (template.Contains(splitKey))
+            {
+                var sp = template.Split([splitKey], System.StringSplitOptions.RemoveEmptyEntries);
+                if (sp.Length > 0)
+                {
+                    foreach (var item in sp)
+                    {
+                        var keyword = item.Trim();
+                        if (!string.IsNullOrEmpty(keyword))
+                        {
+                            keywords.Add(keyword);
+                        }
+                    }
+                }
+            }
+
+            keywords = keywords.Distinct().ToList();
+        }
+    }
+
+    public IEnumerable<string> Keywords { get; private set; }
 
     public IHistoryTransform Clone()
     {
-        return new PhiHistoryTransform();
+        return new BasicHistoryTransform(this._systemTemplate, this._userTemplate, this._assistantTemplate);
     }
 
     public string HistoryToText(ChatHistory history)
     {
         var historyText = string.Join("\n", history.Messages.Select(this.GetMessageText));
-        return $"{historyText}\n{START_PREFIX}{this.GetPrefix(AuthorRole.Assistant)}";
+        var assistantPrefix = this._assistantTemplate.Split(["{{assistant}}"], System.StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? string.Empty;
+        return $"{historyText}\n{assistantPrefix}";
     }
 
     public ChatHistory TextToHistory(AuthorRole role, string text)
     {
         var history = new ChatHistory();
-        history.AddMessage(role, this.TrimNamesFromText(text, role));
+        history.AddMessage(role, this.TrimNamesFromText(text));
         return history;
     }
-    private string TrimNamesFromText(string text, AuthorRole role)
+    private string TrimNamesFromText(string text)
     {
-        if (role == AuthorRole.User && text.StartsWith(START_PREFIX + USER_PREFIX, System.StringComparison.InvariantCultureIgnoreCase))
+        if (this.Keywords?.Count() > 0)
         {
-            text = text.Substring(START_PREFIX.Length + USER_PREFIX.Length).Replace(END_SUFFIX, string.Empty).Trim();
-        }
-        else if (role == AuthorRole.Assistant && text.EndsWith(START_PREFIX + ASSISTANT_PREFIX, System.StringComparison.InvariantCultureIgnoreCase))
-        {
-            text = text.Substring(0, text.Length - START_PREFIX.Length - ASSISTANT_PREFIX.Length).TrimEnd();
+            foreach (var keyword in this.Keywords)
+            {
+                text = text.Replace(keyword, string.Empty);
+            }
         }
 
         return text;
     }
 
-
-    private string GetPrefix(AuthorRole role)
-    {
-        return role switch
-        {
-            AuthorRole.System => SYSTEM_PREFIX,
-            AuthorRole.User => USER_PREFIX,
-            AuthorRole.Assistant => ASSISTANT_PREFIX,
-            _ => "unknown",
-        };
-    }
-
     private string GetMessageText(ChatHistory.Message message)
     {
-        var roleText = this.GetPrefix(message.AuthorRole);
-        return $"{START_PREFIX}{roleText}\n{message.Content}{END_SUFFIX}";
+        return message.AuthorRole switch
+        {
+            AuthorRole.System => this._systemTemplate.Replace("{{system}}", message.Content),
+            AuthorRole.User => this._userTemplate.Replace("{{user}}", message.Content),
+            AuthorRole.Assistant => this._assistantTemplate.Replace("{{assistant}}", message.Content),
+            _ => "unknown",
+        };
     }
 }

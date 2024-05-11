@@ -22,6 +22,9 @@ public sealed class LlamaSharpPromptExecutionSettings : PromptExecutionSettings
     private IList<string>? _stopSequences = [DEFAULT_END_SUFFIX];
     private int _resultsPerPrompt = 1;
     private string? _responseFormat = string.Empty;
+    private string? _systemTemplate;
+    private string? _userTemplate;
+    private string? _assistantTemplate;
     private IDictionary<int, int>? _tokenSelectionBiases = new Dictionary<int, int>();
 
     /// <summary>
@@ -169,6 +172,48 @@ public sealed class LlamaSharpPromptExecutionSettings : PromptExecutionSettings
         }
     }
 
+    /// <summary>
+    /// System template to use for the response.
+    /// </summary>
+    [JsonPropertyName("system_template")]
+    public string? SystemTemplate
+    {
+        get => this._systemTemplate;
+        set
+        {
+            this.ThrowIfFrozen();
+            this._systemTemplate = value;
+        }
+    }
+
+    /// <summary>
+    /// User template to use for the response.
+    /// </summary>
+    [JsonPropertyName("user_template")]
+    public string? UserTemplate
+    {
+        get => this._userTemplate;
+        set
+        {
+            this.ThrowIfFrozen();
+            this._userTemplate = value;
+        }
+    }
+
+    /// <summary>
+    /// Assistant template to use for the response.
+    /// </summary>
+    [JsonPropertyName("assistant_template")]
+    public string? AssistantTemplate
+    {
+        get => this._assistantTemplate;
+        set
+        {
+            this.ThrowIfFrozen();
+            this._assistantTemplate = value;
+        }
+    }
+
     /// <inheritdoc/>
     public override void Freeze()
     {
@@ -206,6 +251,9 @@ public sealed class LlamaSharpPromptExecutionSettings : PromptExecutionSettings
             ResultsPerPrompt = this.ResultsPerPrompt,
             ResponseFormat = this.ResponseFormat,
             TokenSelectionBiases = this.TokenSelectionBiases is not null ? new Dictionary<int, int>(this.TokenSelectionBiases) : null,
+            SystemTemplate = this.SystemTemplate,
+            UserTemplate = this.UserTemplate,
+            AssistantTemplate = this.AssistantTemplate,
         };
     }
 

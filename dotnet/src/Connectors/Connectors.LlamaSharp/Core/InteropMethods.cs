@@ -38,7 +38,7 @@ internal static class InteropMethods
             throw new ArgumentNullException(nameof(requestSettings));
         }
 
-        var antiPrompts = new List<string>(requestSettings.StopSequences)
+        var antiPrompts = new List<string>(requestSettings.StopSequences ?? [])
                                   { LLama.Common.AuthorRole.User.ToString() + ":" ,
                                     LLama.Common.AuthorRole.Assistant.ToString() + ":",
                                     LLama.Common.AuthorRole.System.ToString() + ":"};

@@ -33,6 +33,10 @@
     <PackageVersion Include="Microsoft.Identity.Client" Version="4.60.3" />
     <PackageVersion Include="Microsoft.ML.OnnxRuntime" Version="1.17.1" />
     <PackageVersion Include="FastBertTokenizer" Version="1.0.28" />
+    <PackageVersion Include="Richasy.LLamaSharp.Backend.Cpu.Windows" Version="0.999.0" />
+    <PackageVersion Include="Richasy.LLamaSharp.Backend.Cuda11.Windows" Version="0.999.0" />
+    <PackageVersion Include="Richasy.LLamaSharp.Backend.Cuda12.Windows" Version="0.999.0" />
+    <PackageVersion Include="Richasy.LLamaSharp.Backend.OpenCL.Windows" Version="0.999.0" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="8.0.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
     <PackageVersion Include="System.Memory.Data" Version="8.0.0" />

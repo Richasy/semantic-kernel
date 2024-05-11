@@ -20,6 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\LLamaSharp\LLama\LLamaSharp.csproj" />
     <ProjectReference Include="..\..\SemanticKernel.Abstractions\SemanticKernel.Abstractions.csproj" />
     <ProjectReference Include="..\..\SemanticKernel.Core\SemanticKernel.Core.csproj" />
   </ItemGroup>
@@ -29,10 +30,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LLamaSharp" />
-    <PackageReference Include="LLamaSharp.Backend.Cpu" />
-    <PackageReference Include="LLamaSharp.Backend.Cuda11" />
-    <PackageReference Include="LLamaSharp.Backend.Cuda12" />
+    <PackageReference Include="Richasy.LLamaSharp.Backend.Cpu.Windows" />
+    <PackageReference Include="Richasy.LLamaSharp.Backend.Cuda11.Windows" />
+    <PackageReference Include="Richasy.LLamaSharp.Backend.Cuda12.Windows" />
+    <PackageReference Include="Richasy.LLamaSharp.Backend.OpenCL.Windows" />
   </ItemGroup>
 
 </Project>

@@ -11,14 +11,15 @@ namespace Microsoft.SemanticKernel.Connectors.LlamaSharp;
 /// <summary>
 /// Represents the settings for executing a prompt with the local model.
 /// </summary>
-internal class LlamaSharpPromptExecutionSettings : PromptExecutionSettings
+public sealed class LlamaSharpPromptExecutionSettings : PromptExecutionSettings
 {
+    private const string DEFAULT_END_SUFFIX = "<|im_end|>";
     private double _temperature = 1;
     private double _topP = 1;
     private double _presencePenalty = 0;
     private double _frequencyPenalty = 0;
     private int? _maxTokens;
-    private IList<string>? _stopSequences = Array.Empty<string>();
+    private IList<string>? _stopSequences = [DEFAULT_END_SUFFIX];
     private int _resultsPerPrompt = 1;
     private string? _responseFormat = string.Empty;
     private IDictionary<int, int>? _tokenSelectionBiases = new Dictionary<int, int>();

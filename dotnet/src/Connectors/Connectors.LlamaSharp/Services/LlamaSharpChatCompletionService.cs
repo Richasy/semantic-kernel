@@ -23,9 +23,10 @@ namespace Microsoft.SemanticKernel.Connectors.LlamaSharp;
 public sealed class LlamaSharpChatCompletionService : IChatCompletionService
 {
     private readonly Dictionary<string, object?> _attributesInternal = [];
-    private readonly ILLamaExecutor _interactiveExecutor;
+    private readonly LLamaContext _context;
+    private readonly InteractiveExecutor _interactiveExecutor;
     private readonly IHistoryTransform _historyTransform;
-    private readonly ITextStreamTransform _outputTransform;
+    private readonly KeywordTextOutputStreamTransform _outputTransform;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LlamaSharpChatCompletionService"/> class.
@@ -45,8 +46,8 @@ public sealed class LlamaSharpChatCompletionService : IChatCompletionService
         };
 
         using var model = LLamaWeights.LoadFromFile(parameters);
-        var context = model.CreateContext(parameters, loggerFactory?.CreateLogger<LlamaSharpChatCompletionService>());
-        this._interactiveExecutor = new InteractiveExecutor(context);
+        this._context = model.CreateContext(parameters, loggerFactory?.CreateLogger<LlamaSharpChatCompletionService>());
+        this._interactiveExecutor = new InteractiveExecutor(this._context);
         this._historyTransform = this.GetHistoryTransform(modelPath);
         this._outputTransform = new KeywordTextOutputStreamTransform(this.GetKeywords(modelPath));
         this._attributesInternal.Add(AIServiceExtensions.ModelIdKey, modelPath);
@@ -88,6 +89,14 @@ public sealed class LlamaSharpChatCompletionService : IChatCompletionService
         }
     }
 
+    /// <summary>
+    /// Releases the resources used by the <see cref="LlamaSharpChatCompletionService"/>.
+    /// </summary>
+    public void Release()
+    {
+        this._context?.Dispose();
+    }
+
     private string GetFormattedPrompt(ChatCompletion.ChatHistory chatHistory)
     {
         string prompt;
@@ -111,9 +120,7 @@ public sealed class LlamaSharpChatCompletionService : IChatCompletionService
         return modelType switch
         {
             ModelTemplateType.Phi => PhiHistoryTransform.Keywrods,
-            _ => [ $"{LLama.Common.AuthorRole.User}:",
-                   $"{LLama.Common.AuthorRole.Assistant}:",
-                   $"{LLama.Common.AuthorRole.System}:"],
+            _ => BasicHistoryTransform.Keywrods,
         };
     }
 

@@ -25,6 +25,7 @@ public sealed class LlamaSharpPromptExecutionSettings : PromptExecutionSettings
     private string? _systemTemplate;
     private string? _userTemplate;
     private string? _assistantTemplate;
+    private string? _endTemplate;
     private IDictionary<int, int>? _tokenSelectionBiases = new Dictionary<int, int>();
 
     /// <summary>
@@ -214,6 +215,20 @@ public sealed class LlamaSharpPromptExecutionSettings : PromptExecutionSettings
         }
     }
 
+    /// <summary>
+    /// Loop end template to use for the response.
+    /// </summary>
+    [JsonPropertyName("end_template")]
+    public string? EndTemplate
+    {
+        get => this._endTemplate;
+        set
+        {
+            this.ThrowIfFrozen();
+            this._endTemplate = value;
+        }
+    }
+
     /// <inheritdoc/>
     public override void Freeze()
     {
@@ -254,6 +269,7 @@ public sealed class LlamaSharpPromptExecutionSettings : PromptExecutionSettings
             SystemTemplate = this.SystemTemplate,
             UserTemplate = this.UserTemplate,
             AssistantTemplate = this.AssistantTemplate,
+            EndTemplate = this.EndTemplate,
         };
     }
 

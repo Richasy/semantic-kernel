@@ -12,17 +12,20 @@ internal sealed class BasicHistoryTransform : IHistoryTransform
     private readonly string _systemTemplate;
     private readonly string _userTemplate;
     private readonly string _assistantTemplate;
+    private readonly string _endTemplate;
 
-    public BasicHistoryTransform(string? systemTemplate = default, string? userTemplate = default, string? assistantTemplate = default)
+    public BasicHistoryTransform(string? systemTemplate = default, string? userTemplate = default, string? assistantTemplate = default, string? endTemplate = default)
     {
         this._systemTemplate = systemTemplate ?? "System: {{system}}\n";
         this._userTemplate = userTemplate ?? "User: {{user}}\n";
         this._assistantTemplate = assistantTemplate ?? "Assistant: {{assistant}}\n";
+        this._endTemplate = endTemplate ?? "\n";
 
         var keywords = new List<string>();
         AddKeywords(this._systemTemplate, "{{system}}");
         AddKeywords(this._userTemplate, "{{user}}");
         AddKeywords(this._assistantTemplate, "{{assistant}}");
+        AddKeywords(this._endTemplate, "\n");
         this.Keywords = keywords;
 
         void AddKeywords(string template, string splitKey)
@@ -57,8 +60,7 @@ internal sealed class BasicHistoryTransform : IHistoryTransform
     public string HistoryToText(ChatHistory history)
     {
         var historyText = string.Join("\n", history.Messages.Select(this.GetMessageText));
-        var assistantPrefix = this._assistantTemplate.Split(["{{assistant}}"], System.StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? string.Empty;
-        return $"{historyText}\n{assistantPrefix}";
+        return $"{historyText}{this._endTemplate}";
     }
 
     public ChatHistory TextToHistory(AuthorRole role, string text)

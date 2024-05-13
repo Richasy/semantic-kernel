@@ -81,9 +81,10 @@ public sealed class LlamaSharpChatCompletionService : IChatCompletionService
         var settings = LlamaSharpPromptExecutionSettings.FromExecutionSettings(executionSettings);
         if (!string.IsNullOrEmpty(settings.SystemTemplate)
             || !string.IsNullOrEmpty(settings.UserTemplate)
-            || !string.IsNullOrEmpty(settings.AssistantTemplate))
+            || !string.IsNullOrEmpty(settings.AssistantTemplate)
+            || !string.IsNullOrEmpty(settings.EndTemplate))
         {
-            var historyTransform = new BasicHistoryTransform(settings.SystemTemplate, settings.UserTemplate, settings.AssistantTemplate);
+            var historyTransform = new BasicHistoryTransform(settings.SystemTemplate, settings.UserTemplate, settings.AssistantTemplate, settings.EndTemplate);
             this._outputTransform = new KeywordTextOutputStreamTransform(historyTransform.Keywords!);
             this._historyTransform = historyTransform;
         }

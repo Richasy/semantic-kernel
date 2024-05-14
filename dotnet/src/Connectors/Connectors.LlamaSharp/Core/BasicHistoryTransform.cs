@@ -19,7 +19,7 @@ internal sealed class BasicHistoryTransform : IHistoryTransform
         this._systemTemplate = systemTemplate ?? "System: {{system}}\n";
         this._userTemplate = userTemplate ?? "User: {{user}}\n";
         this._assistantTemplate = assistantTemplate ?? "Assistant: {{assistant}}\n";
-        this._endTemplate = endTemplate ?? "\n";
+        this._endTemplate = endTemplate ?? "Assistant: ";
 
         var keywords = new List<string>();
         AddKeywords(this._systemTemplate, "{{system}}");

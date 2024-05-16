@@ -29,9 +29,4 @@
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Richasy.LLamaSharp.Backend.Cuda11.Windows" />
-    <PackageReference Include="Richasy.LLamaSharp.Backend.Cuda12.Windows" />
-  </ItemGroup>
-
 </Project>

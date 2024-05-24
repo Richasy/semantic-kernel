@@ -87,7 +87,7 @@ public sealed class GeminiPromptExecutionSettings : PromptExecutionSettings
         set
         {
             this.ThrowIfFrozen();
-            this._maxTokens = value;
+            this._maxTokens = value == null || value <= 2 ? default : value;
         }
     }
 

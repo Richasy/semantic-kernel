@@ -69,7 +69,7 @@ public sealed class SparkDeskPromptExecutionSettings : PromptExecutionSettings
         set
         {
             this.ThrowIfFrozen();
-            this._maxTokens = value;
+            this._maxTokens = value == null || value <= 2 ? default : value;
         }
     }
 

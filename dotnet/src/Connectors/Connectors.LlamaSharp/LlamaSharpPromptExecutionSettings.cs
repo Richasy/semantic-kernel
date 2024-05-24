@@ -107,7 +107,7 @@ public sealed class LlamaSharpPromptExecutionSettings : PromptExecutionSettings
         set
         {
             this.ThrowIfFrozen();
-            this._maxTokens = value;
+            this._maxTokens = value == null || value <= 1 ? default : value;
         }
     }
 

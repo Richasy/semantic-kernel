@@ -79,7 +79,7 @@ public sealed class AnthropicPromptExecutionSettings : PromptExecutionSettings
         set
         {
             this.ThrowIfFrozen();
-            this._maxTokens = value;
+            this._maxTokens = value == null || value <= 1 ? default : value;
         }
     }
 

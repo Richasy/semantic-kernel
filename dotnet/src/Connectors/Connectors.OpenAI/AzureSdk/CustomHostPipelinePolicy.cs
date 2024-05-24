@@ -6,7 +6,7 @@ using Azure.Core.Pipeline;
 
 namespace Microsoft.SemanticKernel.Connectors.OpenAI.Core.AzureSdk;
 
-internal class CustomHostPipelinePolicy : HttpPipelineSynchronousPolicy
+internal sealed class CustomHostPipelinePolicy : HttpPipelineSynchronousPolicy
 {
     private readonly Uri _endpoint;
 
@@ -14,16 +14,10 @@ internal class CustomHostPipelinePolicy : HttpPipelineSynchronousPolicy
     {
         this._endpoint = endpoint;
     }
+
     public override void OnSendingRequest(HttpMessage message)
     {
-        if (message?.Request == null)
-        {
-            return;
-        }
-
         // Update current host to provided endpoint
-        var uri = message.Request.Uri.ToString();
-        var newUrl = uri.Replace("https://api.openai.com/v1", this._endpoint.ToString().TrimEnd('/'));
-        message.Request.Uri.Reset(new Uri(newUrl));
+        message.Request?.Uri.Reset(this._endpoint);
     }
 }

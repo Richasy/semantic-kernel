@@ -63,10 +63,13 @@ public sealed class LlamaSharpChatCompletionService : IChatCompletionService
         CancellationToken cancellationToken = default)
     {
         var sb = new StringBuilder();
-        await foreach (var token in this.GetStreamingChatMessageContentsAsync(chatHistory, executionSettings, kernel, cancellationToken).ConfigureAwait(false))
+        await Task.Run(async () =>
         {
-            sb.Append(token.Content);
-        }
+            await foreach (var token in this.GetStreamingChatMessageContentsAsync(chatHistory, executionSettings, kernel, cancellationToken).ConfigureAwait(false))
+            {
+                sb.Append(token.Content);
+            }
+        }, cancellationToken).ConfigureAwait(false);
 
         return new List<ChatMessageContent> { new(ChatCompletion.AuthorRole.Assistant, sb.ToString()) }.AsReadOnly();
     }
@@ -91,7 +94,7 @@ public sealed class LlamaSharpChatCompletionService : IChatCompletionService
 
         var prompt = this.GetFormattedPrompt(chatHistory);
         var result = this._interactiveExecutor.InferAsync(prompt, settings.ToLLamaSharpInferenceParams(), cancellationToken);
-        var output = this._outputTransform.TransformAsync(result);
+        var output = this._outputTransform.TransformAsync(result).ConfigureAwait(false);
         await foreach (var token in output.ConfigureAwait(false))
         {
             yield return new StreamingChatMessageContent(ChatCompletion.AuthorRole.Assistant, token);

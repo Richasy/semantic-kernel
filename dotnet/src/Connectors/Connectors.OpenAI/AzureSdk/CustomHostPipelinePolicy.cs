@@ -18,6 +18,12 @@ internal sealed class CustomHostPipelinePolicy : HttpPipelineSynchronousPolicy
     public override void OnSendingRequest(HttpMessage message)
     {
         // Update current host to provided endpoint
-        message.Request?.Uri.Reset(this._endpoint);
+        var uriBuilder = message.Request?.Uri;
+        if (uriBuilder != null)
+        {
+            uriBuilder.Host = this._endpoint.Host;
+            uriBuilder.Port = this._endpoint.Port;
+            uriBuilder.Path = uriBuilder.Path.Replace("v1", this._endpoint.AbsolutePath.Trim('/'));
+        }
     }
 }

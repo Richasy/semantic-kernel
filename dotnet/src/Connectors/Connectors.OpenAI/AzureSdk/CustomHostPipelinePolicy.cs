@@ -21,6 +21,7 @@ internal sealed class CustomHostPipelinePolicy : HttpPipelineSynchronousPolicy
         var uriBuilder = message.Request?.Uri;
         if (uriBuilder != null)
         {
+            uriBuilder.Scheme = this._endpoint.Scheme;
             uriBuilder.Host = this._endpoint.Host;
             uriBuilder.Port = this._endpoint.Port;
             uriBuilder.Path = uriBuilder.Path.Replace("v1", this._endpoint.AbsolutePath.Trim('/'));

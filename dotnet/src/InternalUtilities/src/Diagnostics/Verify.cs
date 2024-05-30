@@ -77,10 +77,10 @@ internal static partial class Verify
     internal static void ValidPluginName([NotNull] string? pluginName, IReadOnlyKernelPluginCollection? plugins = null, [CallerArgumentExpression(nameof(pluginName))] string? paramName = null)
     {
         NotNullOrWhiteSpace(pluginName);
-        if (!AsciiLettersDigitsUnderscoresRegex().IsMatch(pluginName))
-        {
-            ThrowArgumentInvalidName("plugin name", pluginName, paramName);
-        }
+        // if (!AsciiLettersDigitsUnderscoresRegex().IsMatch(pluginName))
+        // {
+        //     ThrowArgumentInvalidName("plugin name", pluginName, paramName);
+        // }
 
         if (plugins is not null && plugins.Contains(pluginName))
         {

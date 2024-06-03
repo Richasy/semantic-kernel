@@ -30,5 +30,5 @@ public sealed class TranslateTextContent
 
     /// <inheritdoc />
     public override string ToString()
-        => this.Text;
+        => this.Text ?? string.Empty;
 }

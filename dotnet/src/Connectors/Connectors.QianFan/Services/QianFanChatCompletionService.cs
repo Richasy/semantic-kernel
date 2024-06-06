@@ -2,13 +2,13 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.QianFan.Core;
 using Microsoft.SemanticKernel.Http;
 using Microsoft.SemanticKernel.Services;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.SemanticKernel.Connectors.QianFan.Core;
 
 namespace Microsoft.SemanticKernel.Connectors.QianFan;
 

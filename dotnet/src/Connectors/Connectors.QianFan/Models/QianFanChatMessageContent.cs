@@ -2,7 +2,6 @@
 
 using System.Text;
 using Microsoft.SemanticKernel.ChatCompletion;
-using System.Collections.Generic;
 
 namespace Microsoft.SemanticKernel.Connectors.QianFan;
 

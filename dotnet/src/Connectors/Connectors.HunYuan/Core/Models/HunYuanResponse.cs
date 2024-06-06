@@ -67,5 +67,3 @@ internal sealed class HunYuanResponse
         }
     }
 }
-
-

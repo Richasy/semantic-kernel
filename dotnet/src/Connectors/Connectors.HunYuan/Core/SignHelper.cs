@@ -8,7 +8,7 @@ namespace Microsoft.SemanticKernel.Connectors.HunYuan.Core;
 /// <summary>
 /// Signature helper class.
 /// </summary>
-internal class SignHelper
+internal static class SignHelper
 {
     public static string SHA256Hex(string s)
     {
@@ -32,7 +32,7 @@ internal class SignHelper
 
     public static byte[] HmacSHA256(byte[] key, byte[] msg)
     {
-        using (HMACSHA256 mac = new HMACSHA256(key))
+        using (HMACSHA256 mac = new(key))
         {
             return mac.ComputeHash(msg);
         }

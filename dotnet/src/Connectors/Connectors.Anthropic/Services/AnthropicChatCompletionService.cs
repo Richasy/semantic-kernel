@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.Anthropic.Core;
 using Microsoft.SemanticKernel.Http;
 using Microsoft.SemanticKernel.Services;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.SemanticKernel.Connectors.Anthropic.Core;
-using System;
 
 namespace Microsoft.SemanticKernel.Connectors.Anthropic;
 

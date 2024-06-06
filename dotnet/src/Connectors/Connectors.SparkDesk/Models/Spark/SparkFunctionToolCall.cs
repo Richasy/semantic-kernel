@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Collections.Generic;
 using System;
-using Microsoft.SemanticKernel.Connectors.SparkDesk.Core;
-using System.Text.Json;
+using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
+using Microsoft.SemanticKernel.Connectors.SparkDesk.Core;
 
 namespace Microsoft.SemanticKernel.Connectors.SparkDesk;
 

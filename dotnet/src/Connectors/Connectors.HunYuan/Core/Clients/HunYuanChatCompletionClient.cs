@@ -1,18 +1,18 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
-using System.Diagnostics.Metrics;
-using Microsoft.Extensions.Logging;
-using System.Net.Http;
-using Microsoft.SemanticKernel.Text;
-using Microsoft.SemanticKernel.ChatCompletion;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.SemanticKernel.Http;
 using System.Linq;
+using System.Net.Http;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Http;
+using Microsoft.SemanticKernel.Text;
 
 namespace Microsoft.SemanticKernel.Connectors.HunYuan.Core;
 

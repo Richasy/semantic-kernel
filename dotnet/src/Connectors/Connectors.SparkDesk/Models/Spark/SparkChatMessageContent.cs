@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Text;
 using System.Collections.Generic;
-using Microsoft.SemanticKernel.ChatCompletion;
 using System.Linq;
+using System.Text;
+using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.SparkDesk.Core;
 
 namespace Microsoft.SemanticKernel.Connectors.SparkDesk;

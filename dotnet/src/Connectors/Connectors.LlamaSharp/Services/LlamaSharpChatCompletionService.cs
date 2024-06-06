@@ -1,17 +1,17 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using LLama;
 using LLama.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Services;
 using Microsoft.SemanticKernel.Connectors.LlamaSharp.Core;
+using Microsoft.SemanticKernel.Services;
 using static LLama.LLamaTransforms;
-using System.Text;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.SemanticKernel.Connectors.LlamaSharp;
 

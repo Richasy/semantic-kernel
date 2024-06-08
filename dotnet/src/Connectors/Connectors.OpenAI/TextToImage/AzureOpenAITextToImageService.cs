@@ -151,15 +151,20 @@ public sealed class AzureOpenAITextToImageService : ITextToImageService
     /// <inheritdoc/>
     public async Task<string> GenerateImageAsync(
         string description,
-        int width,
-        int height,
+        DrawExecutionSettings settings,
         Kernel? kernel = null,
         CancellationToken cancellationToken = default)
     {
         Verify.NotNull(description);
 
+        var drawSettings = OpenAIDrawExecutionSettings.FromExecutionSettings(settings);
+        var width = drawSettings.Width;
+        var height = drawSettings.Height;
+
         var size = (width, height) switch
         {
+            (256, 256) => ImageSize.Size256x256,
+            (512, 512) => ImageSize.Size512x512,
             (1024, 1024) => ImageSize.Size1024x1024,
             (1792, 1024) => ImageSize.Size1792x1024,
             (1024, 1792) => ImageSize.Size1024x1792,

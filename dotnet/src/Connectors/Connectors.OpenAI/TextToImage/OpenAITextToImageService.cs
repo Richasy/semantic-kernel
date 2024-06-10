@@ -75,7 +75,7 @@ public sealed class OpenAITextToImageService : ITextToImageService
         }
         else
         {
-            this.Endpoint = providedEndpoint;
+            this.Endpoint = new Uri(providedEndpoint.ToString().TrimEnd('/') + "/images/generations");
         }
 
         this._core = new(httpClient, loggerFactory?.CreateLogger(this.GetType()));

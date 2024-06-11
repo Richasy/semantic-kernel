@@ -30,7 +30,7 @@ public sealed class SparkDeskChatCompletionService : IChatCompletionService
         string apiKey,
         string secret,
         string appId,
-        SparkDeskAIVersion apiVersion = SparkDeskAIVersion.V3_5,
+        SparkDeskTextVersion apiVersion = SparkDeskTextVersion.V3_5,
         ILoggerFactory? loggerFactory = null)
     {
         Verify.NotNullOrWhiteSpace(apiKey);

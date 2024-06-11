@@ -17,7 +17,7 @@ namespace Microsoft.SemanticKernel.Connectors.SparkDesk.Core;
 
 internal sealed class SparkChatCompletionClient : ClientBase
 {
-    private readonly SparkDeskAIVersion _version;
+    private readonly SparkDeskTextVersion _version;
     private readonly string? _appId;
     private readonly Uri _chatStreamingEndpoint;
 
@@ -88,7 +88,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
         string apiKey,
         string secret,
         string appId,
-        SparkDeskAIVersion apiVersion,
+        SparkDeskTextVersion apiVersion,
         ILogger? logger = null)
         : base(logger: logger)
     {
@@ -250,7 +250,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
     {
         sparkExecutionSettings.Version = this._version;
         var sparkRequest = SparkTextRequest.FromChatHistoryAndExecutionSettings(chatHistory, sparkExecutionSettings);
-        sparkRequest.Header = new SparkTextRequest.SparkRequestHeader { AppId = this._appId };
+        sparkRequest.Header = new SparkRequestHeader { AppId = this._appId };
         sparkExecutionSettings.ToolCallBehavior?.ConfigureSparkTextRequest(kernel, sparkRequest);
         return sparkRequest;
     }

@@ -43,11 +43,11 @@ internal abstract class ClientBase
         }
     }
 
-    protected static string GetAuthorizationUrl(string apiKey, string secret, string hostUrl)
+    protected static string GetAuthorizationUrl(string apiKey, string secret, string hostUrl, string type = "GET")
     {
         var url = new Uri(hostUrl);
         var dateString = DateTime.UtcNow.ToString("r");
-        var signatureBytes = Encoding.ASCII.GetBytes($"host: {url.Host}\ndate: {dateString}\nGET {url.AbsolutePath} HTTP/1.1");
+        var signatureBytes = Encoding.ASCII.GetBytes($"host: {url.Host}\ndate: {dateString}\n{type} {url.AbsolutePath} HTTP/1.1");
 
         using HMACSHA256 hmacsha256 = new(Encoding.ASCII.GetBytes(secret));
         var computedHash = hmacsha256.ComputeHash(signatureBytes);
@@ -71,13 +71,13 @@ internal abstract class ClientBase
         }
     }
 
-    protected static string GetHostApi(SparkDeskAIVersion version)
+    protected static string GetHostApi(SparkDeskTextVersion version)
         => version switch
         {
-            SparkDeskAIVersion.V1_5 => $"{BaseUrl}/v1.1",
-            SparkDeskAIVersion.V2 => $"{BaseUrl}/v2.1",
-            SparkDeskAIVersion.V3 => $"{BaseUrl}/v3.1",
-            SparkDeskAIVersion.V3_5 => $"{BaseUrl}/v3.5",
+            SparkDeskTextVersion.V1_5 => $"{BaseUrl}/v1.1",
+            SparkDeskTextVersion.V2 => $"{BaseUrl}/v2.1",
+            SparkDeskTextVersion.V3 => $"{BaseUrl}/v3.1",
+            SparkDeskTextVersion.V3_5 => $"{BaseUrl}/v3.5",
             _ => throw new ArgumentOutOfRangeException(nameof(version), version, "Unknown version"),
         };
 }

@@ -12,14 +12,14 @@ internal sealed class SparkTextRequest
     public SparkRequestHeader? Header { get; set; }
 
     [JsonPropertyName("parameter")]
-    public SparkRequestParametersContainer? Parameter { get; set; }
+    public SparkTextRequestParametersContainer? Parameter { get; set; }
 
     [JsonPropertyName("payload")]
-    public SparkRequestPayload? Payload { get; set; }
+    public SparkTextRequestPayload? Payload { get; set; }
 
     public void AddFunction(SparkDeskFunction function)
     {
-        this.Payload ??= new SparkRequestPayload();
+        this.Payload ??= new SparkTextRequestPayload();
         this.Payload.Functions ??= new SparkTool();
         this.Payload.Functions.Functions ??= [];
 
@@ -66,7 +66,7 @@ internal sealed class SparkTextRequest
     {
         SparkTextRequest obj = new()
         {
-            Payload = new SparkRequestPayload
+            Payload = new SparkTextRequestPayload
             {
                 Message = new SparkMessage
                 {
@@ -89,25 +89,10 @@ internal sealed class SparkTextRequest
 
     private static void AddConfiguration(SparkDeskPromptExecutionSettings executionSettings, SparkTextRequest request)
     {
-        request.Parameter = new SparkRequestParametersContainer { Chat = new SparkRequestParameters(executionSettings) };
+        request.Parameter = new SparkTextRequestParametersContainer { Chat = new SparkRequestParameters(executionSettings) };
     }
 
-    internal sealed class SparkRequestHeader
-    {
-        /// <summary>
-        /// The application appid, obtained from the open platform control panel.
-        /// </summary>
-        [JsonPropertyName("app_id")]
-        public string? AppId { get; set; }
-
-        /// <summary>
-        /// The user's id, used to distinguish between different users. Not required.
-        /// </summary>
-        [JsonPropertyName("uid")]
-        public string? Uid { get; set; }
-    }
-
-    internal sealed class SparkRequestParametersContainer
+    internal sealed class SparkTextRequestParametersContainer
     {
         [JsonPropertyName("chat")]
         [JsonRequired]
@@ -128,10 +113,10 @@ internal sealed class SparkTextRequest
             this.ChatId = settings.ChatId;
             this.Domain = settings.Version switch
             {
-                SparkDeskAIVersion.V1_5 => "general",
-                SparkDeskAIVersion.V2 => "generalv2",
-                SparkDeskAIVersion.V3 => "generalv3",
-                SparkDeskAIVersion.V3_5 => "generalv3.5",
+                SparkDeskTextVersion.V1_5 => "general",
+                SparkDeskTextVersion.V2 => "generalv2",
+                SparkDeskTextVersion.V3 => "generalv3",
+                SparkDeskTextVersion.V3_5 => "generalv3.5",
                 _ => default,
             };
         }
@@ -156,7 +141,7 @@ internal sealed class SparkTextRequest
         public string? Domain { get; set; }
     }
 
-    internal sealed class SparkRequestPayload
+    internal sealed class SparkTextRequestPayload
     {
         [JsonPropertyName("message")]
         public SparkMessage? Message { get; set; }
@@ -165,4 +150,19 @@ internal sealed class SparkTextRequest
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public SparkTool? Functions { get; set; }
     }
+}
+
+internal sealed class SparkRequestHeader
+{
+    /// <summary>
+    /// The application appid, obtained from the open platform control panel.
+    /// </summary>
+    [JsonPropertyName("app_id")]
+    public string? AppId { get; set; }
+
+    /// <summary>
+    /// The user's id, used to distinguish between different users. Not required.
+    /// </summary>
+    [JsonPropertyName("uid")]
+    public string? Uid { get; set; }
 }

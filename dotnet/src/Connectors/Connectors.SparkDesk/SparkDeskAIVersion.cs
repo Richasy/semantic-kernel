@@ -7,7 +7,7 @@ namespace Microsoft.SemanticKernel.Connectors.SparkDesk;
 /// <summary>
 /// Represents the version of the Spark Desk AI API.
 /// </summary>
-public enum SparkDeskAIVersion
+public enum SparkDeskTextVersion
 {
     /// <summary>
     /// Represents the V1.5 version of the Spark Desk AI API.

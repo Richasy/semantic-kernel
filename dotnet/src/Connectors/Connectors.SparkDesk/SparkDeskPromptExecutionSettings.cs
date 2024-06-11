@@ -19,7 +19,7 @@ public sealed class SparkDeskPromptExecutionSettings : PromptExecutionSettings
     private int? _topK;
     private int? _maxTokens;
     private string? _chatId;
-    private SparkDeskAIVersion _version;
+    private SparkDeskTextVersion _version;
     private SparkDeskToolCallBehavior? _toolCallBehavior;
 
     /// <summary>
@@ -90,7 +90,7 @@ public sealed class SparkDeskPromptExecutionSettings : PromptExecutionSettings
     /// Gets or sets the version of the SparkDesk AI model to use.
     /// </summary>
     [JsonPropertyName("version")]
-    public SparkDeskAIVersion Version
+    public SparkDeskTextVersion Version
     {
         get => this._version;
         set

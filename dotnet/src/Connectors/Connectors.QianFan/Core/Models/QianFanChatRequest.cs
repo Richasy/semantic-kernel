@@ -7,7 +7,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Microsoft.SemanticKernel.Connectors.QianFan.Core;
 
-internal sealed class QianFanRequest
+internal sealed class QianFanChatRequest
 {
     [JsonPropertyName("messages")]
     public IList<QianFanMessageContent> Messages { get; set; } = null!;
@@ -61,24 +61,24 @@ internal sealed class QianFanRequest
     public string? UserId { get; set; }
 
     /// <summary>
-    /// Creates a <see cref="QianFanRequest"/> object from the given <see cref="ChatHistory"/> and <see cref="QianFanPromptExecutionSettings"/>.
+    /// Creates a <see cref="QianFanChatRequest"/> object from the given <see cref="ChatHistory"/> and <see cref="QianFanPromptExecutionSettings"/>.
     /// </summary>
     /// <param name="chatHistory">The chat history to be assigned to the QianFanRequest.</param>
     /// <param name="executionSettings">The execution settings to be applied to the QianFanRequest.</param>
-    /// <returns>A new instance of <see cref="QianFanRequest"/>.</returns>
-    public static QianFanRequest FromChatHistoryAndExecutionSettings(
+    /// <returns>A new instance of <see cref="QianFanChatRequest"/>.</returns>
+    public static QianFanChatRequest FromChatHistoryAndExecutionSettings(
         ChatHistory chatHistory,
         QianFanPromptExecutionSettings executionSettings)
     {
-        QianFanRequest obj = CreateQianFanRequest(chatHistory);
+        QianFanChatRequest obj = CreateQianFanRequest(chatHistory);
         AddConfiguration(executionSettings, obj);
         return obj;
     }
 
-    private static QianFanRequest CreateQianFanRequest(ChatHistory chatHistory)
+    private static QianFanChatRequest CreateQianFanRequest(ChatHistory chatHistory)
     {
         var systemMessage = chatHistory.FirstOrDefault(x => x.Role == AuthorRole.System);
-        QianFanRequest obj = new()
+        QianFanChatRequest obj = new()
         {
             Messages = chatHistory.Where(p => p.Role != AuthorRole.System).Select(CreateQianFanContentFromChatMessage).ToList()
         };
@@ -108,7 +108,7 @@ internal sealed class QianFanRequest
         this.Messages.Add(CreateQianFanContentFromChatMessage(message));
     }
 
-    private static void AddConfiguration(QianFanPromptExecutionSettings executionSettings, QianFanRequest request)
+    private static void AddConfiguration(QianFanPromptExecutionSettings executionSettings, QianFanChatRequest request)
     {
         request.Temperature = executionSettings.Temperature;
         request.TopP = executionSettings.TopP;

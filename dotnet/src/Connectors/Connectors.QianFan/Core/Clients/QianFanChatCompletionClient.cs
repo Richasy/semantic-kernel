@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -24,10 +23,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
 {
     private readonly StreamJsonParser _streamJsonParser = new();
     private readonly string _modelId;
-    private readonly string _apiKey;
-    private readonly string _apiSecret;
     private readonly Uri _chatGenerationEndpoint;
-    private QianFanTokenContext? _token;
 
     private static readonly string s_namespace = typeof(QianFanChatCompletionClient).Namespace!;
 
@@ -78,16 +74,14 @@ internal sealed class QianFanChatCompletionClient : ClientBase
         string apiSecret,
         ILogger? logger = null)
         : base(
+            apiKey,
+            apiSecret,
             httpClient: httpClient,
             logger: logger)
     {
         Verify.NotNullOrWhiteSpace(modelId);
-        Verify.NotNullOrWhiteSpace(apiKey);
-        Verify.NotNullOrWhiteSpace(apiSecret);
 
         this._modelId = modelId;
-        this._apiKey = apiKey;
-        this._apiSecret = apiSecret;
         this._chatGenerationEndpoint = new Uri($"https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/{this._modelId}");
     }
 
@@ -134,7 +128,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
         {
             state.QianFanRequest.Stream = true;
             await this.EnsureAuthTokenAsync().ConfigureAwait(false);
-            using var httpRequestMessage = this.CreateHttpRequest(state.QianFanRequest, this._chatGenerationEndpoint, this._token!.Token.AccessToken!);
+            using var httpRequestMessage = this.CreateHttpRequest(state.QianFanRequest, this._chatGenerationEndpoint);
             using var response = await this.SendRequestAndGetResponseImmediatelyAfterHeadersReadAsync(httpRequestMessage, cancellationToken)
                 .ConfigureAwait(false);
             using var responseStream = await response.Content.ReadAsStreamAndTranslateExceptionAsync()
@@ -198,42 +192,18 @@ internal sealed class QianFanChatCompletionClient : ClientBase
         }
     }
 
-    private async Task<QianFanResponse> SendRequestAndReturnValidQianFanResponseAsync(
+    private async Task<QianFanChatResponse> SendRequestAndReturnValidQianFanResponseAsync(
         Uri endpoint,
-        QianFanRequest qianFanRequest,
+        QianFanChatRequest qianFanRequest,
         CancellationToken cancellationToken)
     {
         await this.EnsureAuthTokenAsync().ConfigureAwait(false);
-        using var httpRequestMessage = this.CreateHttpRequest(qianFanRequest, endpoint, this._token!.Token.AccessToken!);
+        using var httpRequestMessage = this.CreateHttpRequest(qianFanRequest, endpoint);
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
-        var qianFanResponse = DeserializeResponse<QianFanResponse>(body);
+        var qianFanResponse = DeserializeResponse<QianFanChatResponse>(body);
         ValidateQianFanResponse(qianFanResponse);
         return qianFanResponse;
-    }
-
-    private async Task EnsureAuthTokenAsync()
-    {
-        if (this._token == null || !this._token.IsValid)
-        {
-            this._token = new QianFanTokenContext(await CreateAuthTokenAsync(this._apiKey, this._apiSecret).ConfigureAwait(false), DateTime.Now);
-        }
-    }
-
-    private static async Task<QianFanAuthToken> CreateAuthTokenAsync(string apiKey, string apiSecret, CancellationToken cancellationToken = default)
-    {
-        using HttpClient http = new();
-        string apiUri = $"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={apiKey}&client_secret={apiSecret}";
-        HttpResponseMessage resp = await http.GetAsync(apiUri, cancellationToken).ConfigureAwait(false);
-
-        if (resp.IsSuccessStatusCode)
-        {
-            var stringContent = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var token = JsonSerializer.Deserialize<QianFanAuthToken>(stringContent);
-            return token ?? throw new KernelException($"Unable to deserialize '{await resp.Content.ReadAsStringAsync().ConfigureAwait(false)}' into {nameof(QianFanAuthToken)}.");
-        }
-
-        throw new HttpRequestException($"{resp.ReasonPhrase}: {await resp.Content.ReadAsStringAsync().ConfigureAwait(false)}");
     }
 
     private static void ValidateAndPrepareChatHistory(ChatHistory chatHistory)
@@ -270,17 +240,17 @@ internal sealed class QianFanChatCompletionClient : ClientBase
         }
     }
 
-    private async IAsyncEnumerable<QianFanResponse> ParseResponseStreamAsync(
+    private async IAsyncEnumerable<QianFanChatResponse> ParseResponseStreamAsync(
         Stream responseStream,
         [EnumeratorCancellation] CancellationToken ct)
     {
         await foreach (var json in this._streamJsonParser.ParseAsync(responseStream, cancellationToken: ct).ConfigureAwait(false))
         {
-            yield return DeserializeResponse<QianFanResponse>(json);
+            yield return DeserializeResponse<QianFanChatResponse>(json);
         }
     }
 
-    private List<QianFanChatMessageContent> ProcessChatResponse(QianFanResponse qianFanResponse)
+    private List<QianFanChatMessageContent> ProcessChatResponse(QianFanChatResponse qianFanResponse)
     {
         ValidateQianFanResponse(qianFanResponse);
 
@@ -289,7 +259,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
         return chatMessageContents;
     }
 
-    private static void ValidateQianFanResponse(QianFanResponse qianFanResponse)
+    private static void ValidateQianFanResponse(QianFanChatResponse qianFanResponse)
     {
         if (string.IsNullOrEmpty(qianFanResponse.Result))
         {
@@ -306,10 +276,10 @@ internal sealed class QianFanChatCompletionClient : ClientBase
     private void LogUsage(List<QianFanChatMessageContent> chatMessageContents)
         => this.LogUsageMetadata(chatMessageContents[0].Metadata!);
 
-    private List<QianFanChatMessageContent> GetChatMessageContentsFromResponse(QianFanResponse qianFanResponse)
+    private List<QianFanChatMessageContent> GetChatMessageContentsFromResponse(QianFanChatResponse qianFanResponse)
         => [this.GetChatMessageContentFromCandidate(qianFanResponse)];
 
-    private QianFanChatMessageContent GetChatMessageContentFromCandidate(QianFanResponse qianFanResponse)
+    private QianFanChatMessageContent GetChatMessageContentFromCandidate(QianFanChatResponse qianFanResponse)
     {
         return new QianFanChatMessageContent(
             role: AuthorRole.Assistant,
@@ -318,12 +288,12 @@ internal sealed class QianFanChatCompletionClient : ClientBase
             metadata: GetResponseMetadata(qianFanResponse!));
     }
 
-    private static QianFanRequest CreateRequest(
+    private static QianFanChatRequest CreateRequest(
         ChatHistory chatHistory,
         QianFanPromptExecutionSettings qianFanExecutionSettings,
         Kernel? kernel)
     {
-        var qianFanRequest = QianFanRequest.FromChatHistoryAndExecutionSettings(chatHistory, qianFanExecutionSettings);
+        var qianFanRequest = QianFanChatRequest.FromChatHistoryAndExecutionSettings(chatHistory, qianFanExecutionSettings);
         return qianFanRequest;
     }
 
@@ -338,7 +308,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
     }
 
     private static QianFanMetadata GetResponseMetadata(
-        QianFanResponse qianFanResponse) => new()
+        QianFanChatResponse qianFanResponse) => new()
         {
             FinishReason = qianFanResponse.FinishReason,
             IsEnd = qianFanResponse.IsEnd,
@@ -376,7 +346,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
     private sealed class ChatCompletionState
     {
         internal ChatHistory ChatHistory { get; set; } = null!;
-        internal QianFanRequest QianFanRequest { get; set; } = null!;
+        internal QianFanChatRequest QianFanRequest { get; set; } = null!;
         internal Kernel Kernel { get; set; } = null!;
         internal QianFanPromptExecutionSettings ExecutionSettings { get; set; } = null!;
         internal QianFanChatMessageContent? LastMessage { get; set; }

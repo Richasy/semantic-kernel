@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Microsoft.SemanticKernel.Connectors.QianFan.Core;
 
-internal sealed class QianFanResponse
+internal sealed class QianFanChatResponse
 {
     [JsonPropertyName("object")]
     public string? Object { get; set; }

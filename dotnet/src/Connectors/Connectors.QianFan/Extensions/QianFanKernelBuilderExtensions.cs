@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.QianFan;
 using Microsoft.SemanticKernel.Http;
+using Microsoft.SemanticKernel.TextToImage;
 
 namespace Microsoft.SemanticKernel;
 
@@ -35,9 +36,36 @@ public static class QianFanKernelBuilderExtensions
         Verify.NotNull(builder);
         Verify.NotNull(modelId);
         Verify.NotNull(apiKey);
+        Verify.NotNull(apiSecret);
 
         builder.Services.AddKeyedSingleton<IChatCompletionService>(serviceId, (serviceProvider, _) =>
             new QianFanChatCompletionService(
+                modelId: modelId,
+                apiKey: apiKey,
+                apiSecret: apiSecret,
+                httpClient: HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
+                loggerFactory: serviceProvider.GetService<ILoggerFactory>()));
+        return builder;
+    }
+
+    /// <summary>
+    /// Add Baidu AI QianFan Image generation services to the kernel builder.
+    /// </summary>
+    public static IKernelBuilder AddQianFanImageGeneration(
+        this IKernelBuilder builder,
+        string modelId,
+        string apiKey,
+        string apiSecret,
+        string? serviceId = null,
+        HttpClient? httpClient = null)
+    {
+        Verify.NotNull(builder);
+        Verify.NotNull(modelId);
+        Verify.NotNull(apiKey);
+        Verify.NotNull(apiSecret);
+
+        builder.Services.AddKeyedSingleton<ITextToImageService>(serviceId, (serviceProvider, _) =>
+            new QianFanImageGenerationService(
                 modelId: modelId,
                 apiKey: apiKey,
                 apiSecret: apiSecret,

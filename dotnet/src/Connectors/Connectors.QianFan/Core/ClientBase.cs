@@ -14,16 +14,25 @@ namespace Microsoft.SemanticKernel.Connectors.QianFan.Core;
 internal abstract class ClientBase
 {
     private readonly ILogger _logger;
+    private readonly string _apiKey;
+    private readonly string _apiSecret;
+    private QianFanTokenContext? _token;
 
     protected HttpClient HttpClient { get; }
 
     protected ClientBase(
+        string apiKey,
+        string apiSecret,
         HttpClient httpClient,
         ILogger? logger)
     {
         Verify.NotNull(httpClient);
+        Verify.NotNullOrWhiteSpace(apiKey);
+        Verify.NotNullOrWhiteSpace(apiSecret);
 
         this.HttpClient = httpClient;
+        this._apiKey = apiKey;
+        this._apiSecret = apiSecret;
         this._logger = logger ?? NullLogger.Instance;
     }
 
@@ -71,8 +80,9 @@ internal abstract class ClientBase
         }
     }
 
-    protected HttpRequestMessage CreateHttpRequest(object requestData, Uri endpoint, string token)
+    protected HttpRequestMessage CreateHttpRequest(object requestData, Uri endpoint)
     {
+        var token = this._token?.Token?.AccessToken ?? throw new InvalidOperationException("Token is not initialized.");
         endpoint = new Uri(endpoint.AbsoluteUri.TrimEnd('/') + $"?access_token={token}");
         var httpRequestMessage = HttpRequest.CreatePostRequest(endpoint, requestData);
         httpRequestMessage.Headers.Add("User-Agent", HttpHeaderConstant.Values.UserAgent);
@@ -90,5 +100,29 @@ internal abstract class ClientBase
             this._logger.Log(logLevel, message, args);
 #pragma warning restore CA2254
         }
+    }
+
+    protected async Task EnsureAuthTokenAsync()
+    {
+        if (this._token == null || !this._token.IsValid)
+        {
+            this._token = new QianFanTokenContext(await CreateAuthTokenAsync(this._apiKey, this._apiSecret).ConfigureAwait(false), DateTime.Now);
+        }
+    }
+
+    private static async Task<QianFanAuthToken> CreateAuthTokenAsync(string apiKey, string apiSecret, CancellationToken cancellationToken = default)
+    {
+        using HttpClient http = new();
+        string apiUri = $"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={apiKey}&client_secret={apiSecret}";
+        HttpResponseMessage resp = await http.GetAsync(apiUri, cancellationToken).ConfigureAwait(false);
+
+        if (resp.IsSuccessStatusCode)
+        {
+            var stringContent = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var token = JsonSerializer.Deserialize<QianFanAuthToken>(stringContent);
+            return token ?? throw new KernelException($"Unable to deserialize '{await resp.Content.ReadAsStringAsync().ConfigureAwait(false)}' into {nameof(QianFanAuthToken)}.");
+        }
+
+        throw new HttpRequestException($"{resp.ReasonPhrase}: {await resp.Content.ReadAsStringAsync().ConfigureAwait(false)}");
     }
 }

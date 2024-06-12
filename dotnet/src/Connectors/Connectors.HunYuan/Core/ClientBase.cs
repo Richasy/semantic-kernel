@@ -17,8 +17,6 @@ namespace Microsoft.SemanticKernel.Connectors.HunYuan.Core;
 internal abstract class ClientBase
 {
     private readonly ILogger _logger;
-    private readonly string _version = "2023-09-01";
-    private readonly string _action = "ChatCompletions";
 
     protected HttpClient HttpClient { get; }
 
@@ -76,7 +74,14 @@ internal abstract class ClientBase
         }
     }
 
-    protected HttpRequestMessage CreateHttpRequest(object requestData, Uri endpoint, string secretKey, string secretId)
+    protected HttpRequestMessage CreateHttpRequest(
+        object requestData,
+        Uri endpoint,
+        string secretKey,
+        string secretId,
+        string action = "ChatCompletions",
+        string version = "2023-09-01",
+        string? region = default)
     {
         var now = DateTimeOffset.Now.ToUnixTimeSeconds();
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, endpoint);
@@ -84,7 +89,7 @@ internal abstract class ClientBase
         httpRequestMessage.Headers.Add(HttpHeaderConstant.Names.SemanticKernelVersion,
             HttpHeaderConstant.Values.GetAssemblyVersion(typeof(ClientBase)));
 
-        var headers = this.BuildHeaders(endpoint, (HunYuanRequest)requestData, secretKey, secretId);
+        var headers = this.BuildHeaders(endpoint, requestData, secretKey, secretId, action, version, region);
         foreach (var kvp in headers)
         {
             if (kvp.Key.Equals("Content-Type", StringComparison.Ordinal))
@@ -122,12 +127,19 @@ internal abstract class ClientBase
         }
     }
 
-    private Dictionary<string, string> BuildHeaders(Uri endpoint, HunYuanRequest request, string secretKey, string secretId)
+    private Dictionary<string, string> BuildHeaders(
+        Uri endpoint,
+        object request,
+        string secretKey,
+        string secretId,
+        string action,
+        string version,
+        string? region)
     {
         var payload = JsonSerializer.Serialize(request);
         string httpRequestMethod = "POST";
         string canonicalURI = "/";
-        string canonicalHeaders = "content-type:" + "application/json" + "\nhost:" + endpoint.Host + $"\nx-tc-action:{this._action.ToLower()}\n";
+        string canonicalHeaders = "content-type:" + "application/json" + "\nhost:" + endpoint.Host + $"\nx-tc-action:{action.ToLower()}\n";
         string signedHeaders = "content-type;host;x-tc-action";
         string hashedRequestPayload = SignHelper.SHA256Hex(payload);
         string canonicalRequest = httpRequestMethod + "\n"
@@ -168,9 +180,14 @@ internal abstract class ClientBase
             { "Host", endpoint.Host },
             { "Content-Type", "application/json" },
             { "X-TC-Timestamp", requestTimestamp },
-            { "X-TC-Version", this._version },
-            { "X-TC-Action", this._action },
+            { "X-TC-Version", version },
+            { "X-TC-Action", action },
         };
+
+        if (!string.IsNullOrEmpty(region))
+        {
+            headers.Add("X-TC-Region", region);
+        }
 
         return headers;
     }

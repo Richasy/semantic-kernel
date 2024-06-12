@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Microsoft.SemanticKernel.Connectors.HunYuan.Core;
 
-internal sealed class HunYuanResponse
+internal sealed class HunYuanChatResponse
 {
     [JsonPropertyName("Response")]
     public HunYuanMessageResponse? Response { get; set; }

@@ -193,15 +193,15 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
         }
     }
 
-    private async Task<HunYuanResponse> SendRequestAndReturnValidHunYuanResponseAsync(
+    private async Task<HunYuanChatResponse> SendRequestAndReturnValidHunYuanResponseAsync(
         Uri endpoint,
-        HunYuanRequest request,
+        HunYuanChatRequest request,
         CancellationToken cancellationToken)
     {
         using var httpRequestMessage = this.CreateHttpRequest(request, endpoint, this._secretKey, this._secretId);
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
-        var response = DeserializeResponse<HunYuanResponse>(body);
+        var response = DeserializeResponse<HunYuanChatResponse>(body);
         ValidateHunYuanResponse(response.Response!);
         return response;
     }
@@ -238,17 +238,17 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
         }
     }
 
-    private async IAsyncEnumerable<HunYuanResponse> ParseResponseStreamAsync(
+    private async IAsyncEnumerable<HunYuanChatResponse> ParseResponseStreamAsync(
         Stream responseStream,
         [EnumeratorCancellation] CancellationToken ct)
     {
         await foreach (var json in this._streamJsonParser.ParseAsync(responseStream, cancellationToken: ct).ConfigureAwait(false))
         {
-            yield return DeserializeResponse<HunYuanResponse>(json);
+            yield return DeserializeResponse<HunYuanChatResponse>(json);
         }
     }
 
-    private List<HunYuanChatMessageContent> ProcessChatResponse(HunYuanResponse.HunYuanMessageResponse response)
+    private List<HunYuanChatMessageContent> ProcessChatResponse(HunYuanChatResponse.HunYuanMessageResponse response)
     {
         ValidateHunYuanResponse(response);
 
@@ -257,7 +257,7 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
         return chatMessageContents;
     }
 
-    private static void ValidateHunYuanResponse(HunYuanResponse.HunYuanMessageResponse response)
+    private static void ValidateHunYuanResponse(HunYuanChatResponse.HunYuanMessageResponse response)
     {
         if (response.Choices?.Count > 0)
         {
@@ -287,10 +287,10 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
     private void LogUsage(List<HunYuanChatMessageContent> chatMessageContents)
         => this.LogUsageMetadata(chatMessageContents[0].Metadata!);
 
-    private List<HunYuanChatMessageContent> GetChatMessageContentsFromResponse(HunYuanResponse.HunYuanMessageResponse response)
+    private List<HunYuanChatMessageContent> GetChatMessageContentsFromResponse(HunYuanChatResponse.HunYuanMessageResponse response)
         => [this.GetChatMessageContentFromCandidate(response)];
 
-    private HunYuanChatMessageContent GetChatMessageContentFromCandidate(HunYuanResponse.HunYuanMessageResponse response)
+    private HunYuanChatMessageContent GetChatMessageContentFromCandidate(HunYuanChatResponse.HunYuanMessageResponse response)
     {
         var firstChoice = response.Choices![0];
         var content = firstChoice.Message?.Content ?? string.Empty;
@@ -301,11 +301,11 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
             metadata: GetResponseMetadata(response!));
     }
 
-    private HunYuanRequest CreateRequest(
+    private HunYuanChatRequest CreateRequest(
         ChatHistory chatHistory,
         HunYuanPromptExecutionSettings executionSettings)
     {
-        var request = HunYuanRequest.FromChatHistoryAndExecutionSettings(chatHistory, executionSettings);
+        var request = HunYuanChatRequest.FromChatHistoryAndExecutionSettings(chatHistory, executionSettings);
         request.Model = this._modelId;
         return request;
     }
@@ -320,7 +320,7 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
     }
 
     private static HunYuanMetadata GetResponseMetadata(
-        HunYuanResponse.HunYuanMessageResponse response) => new()
+        HunYuanChatResponse.HunYuanMessageResponse response) => new()
         {
             FinishReason = response.Choices?.FirstOrDefault()?.FinishReason,
             TotalTokenCount = response.Usage?.TotalTokens ?? 0,
@@ -351,7 +351,7 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
     private sealed class ChatCompletionState
     {
         internal ChatHistory ChatHistory { get; set; } = null!;
-        internal HunYuanRequest HunYuanRequest { get; set; } = null!;
+        internal HunYuanChatRequest HunYuanRequest { get; set; } = null!;
         internal Kernel Kernel { get; set; } = null!;
         internal HunYuanPromptExecutionSettings ExecutionSettings { get; set; } = null!;
         internal HunYuanChatMessageContent? LastMessage { get; set; }

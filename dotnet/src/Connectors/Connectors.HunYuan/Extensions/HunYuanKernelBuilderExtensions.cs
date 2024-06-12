@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.HunYuan;
 using Microsoft.SemanticKernel.Http;
+using Microsoft.SemanticKernel.TextToImage;
 
 namespace Microsoft.SemanticKernel;
 
@@ -39,6 +40,39 @@ public static class HunYuanKernelBuilderExtensions
 
         builder.Services.AddKeyedSingleton<IChatCompletionService>(serviceId, (serviceProvider, _) =>
             new HunYuanChatCompletionService(
+                modelId: modelId,
+                secretId: secretId,
+                secretKey: secretKey,
+                httpClient: HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
+                loggerFactory: serviceProvider.GetService<ILoggerFactory>()));
+        return builder;
+    }
+
+    /// <summary>
+    /// Add Tencent AI HunYuan Image Generation service to the kernel builder.
+    /// </summary>
+    /// <param name="builder">The kernel builder.</param>
+    /// <param name="modelId">The model for text generation.</param>
+    /// <param name="secretId">The secret ID for authentication HunYuan API.</param>
+    /// <param name="secretKey">The secret key for authentication HunYuan API.</param>
+    /// <param name="serviceId">The optional service ID.</param>
+    /// <param name="httpClient">The optional custom HttpClient.</param>
+    /// <returns>The updated kernel builder.</returns>
+    public static IKernelBuilder AddHunYuanImageGeneration(
+        this IKernelBuilder builder,
+        string modelId,
+        string secretId,
+        string secretKey,
+        string? serviceId = null,
+        HttpClient? httpClient = null)
+    {
+        Verify.NotNull(builder);
+        Verify.NotNull(modelId);
+        Verify.NotNull(secretId);
+        Verify.NotNull(secretKey);
+
+        builder.Services.AddKeyedSingleton<ITextToImageService>(serviceId, (serviceProvider, _) =>
+            new HunYuanImageGenerationService(
                 modelId: modelId,
                 secretId: secretId,
                 secretKey: secretKey,

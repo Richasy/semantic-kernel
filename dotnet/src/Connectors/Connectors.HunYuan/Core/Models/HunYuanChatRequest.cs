@@ -7,7 +7,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Microsoft.SemanticKernel.Connectors.HunYuan.Core;
 
-internal sealed class HunYuanRequest
+internal sealed class HunYuanChatRequest
 {
     [JsonPropertyName("Messages")]
     public IList<HunYuanMessageContent> Messages { get; set; } = null!;
@@ -32,23 +32,23 @@ internal sealed class HunYuanRequest
     public string Model { get; set; } = null!;
 
     /// <summary>
-    /// Creates a <see cref="HunYuanRequest"/> object from the given <see cref="ChatHistory"/> and <see cref="HunYuanPromptExecutionSettings"/>.
+    /// Creates a <see cref="HunYuanChatRequest"/> object from the given <see cref="ChatHistory"/> and <see cref="HunYuanPromptExecutionSettings"/>.
     /// </summary>
     /// <param name="chatHistory">The chat history to be assigned to the HunYuanRequest.</param>
     /// <param name="executionSettings">The execution settings to be applied to the HunYuanRequest.</param>
-    /// <returns>A new instance of <see cref="HunYuanRequest"/>.</returns>
-    public static HunYuanRequest FromChatHistoryAndExecutionSettings(
+    /// <returns>A new instance of <see cref="HunYuanChatRequest"/>.</returns>
+    public static HunYuanChatRequest FromChatHistoryAndExecutionSettings(
         ChatHistory chatHistory,
         HunYuanPromptExecutionSettings executionSettings)
     {
-        HunYuanRequest obj = CreateHunYuanRequest(chatHistory);
+        HunYuanChatRequest obj = CreateHunYuanRequest(chatHistory);
         AddConfiguration(executionSettings, obj);
         return obj;
     }
 
-    private static HunYuanRequest CreateHunYuanRequest(ChatHistory chatHistory)
+    private static HunYuanChatRequest CreateHunYuanRequest(ChatHistory chatHistory)
     {
-        HunYuanRequest obj = new()
+        HunYuanChatRequest obj = new()
         {
             Messages = chatHistory.Where(p => p.Role != AuthorRole.Tool).Select(CreateHunYuanContentFromChatMessage).ToList()
         };
@@ -73,7 +73,7 @@ internal sealed class HunYuanRequest
         this.Messages.Add(CreateHunYuanContentFromChatMessage(message));
     }
 
-    private static void AddConfiguration(HunYuanPromptExecutionSettings executionSettings, HunYuanRequest request)
+    private static void AddConfiguration(HunYuanPromptExecutionSettings executionSettings, HunYuanChatRequest request)
     {
         request.Temperature = executionSettings.Temperature;
         request.TopP = executionSettings.TopP;

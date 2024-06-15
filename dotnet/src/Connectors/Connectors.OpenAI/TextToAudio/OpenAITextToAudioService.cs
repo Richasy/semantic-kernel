@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
@@ -33,19 +34,21 @@ public sealed class OpenAITextToAudioService : ITextToAudioService
     /// <summary>
     /// Creates an instance of the <see cref="OpenAITextToAudioService"/> with API key auth.
     /// </summary>
-    /// <param name="modelId">Model name</param>
     /// <param name="apiKey">OpenAI API Key</param>
+    /// <param name="modelId">Model name</param>
+    /// <param name="endpoint">Open AI custom endpoint.</param>
     /// <param name="organization">OpenAI Organization Id (usually optional)</param>
     /// <param name="httpClient">Custom <see cref="HttpClient"/> for HTTP requests.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for logging. If null, no logging will be performed.</param>
     public OpenAITextToAudioService(
-        string modelId,
         string apiKey,
+        string modelId,
+        Uri? endpoint,
         string? organization = null,
         HttpClient? httpClient = null,
         ILoggerFactory? loggerFactory = null)
     {
-        this._client = new(modelId, apiKey, organization, httpClient, loggerFactory?.CreateLogger(typeof(OpenAITextToAudioService)));
+        this._client = new(apiKey, modelId, endpoint, organization, httpClient, loggerFactory?.CreateLogger(typeof(OpenAITextToAudioService)));
 
         this._client.AddAttribute(AIServiceExtensions.ModelIdKey, modelId);
         this._client.AddAttribute(OrganizationKey, organization);

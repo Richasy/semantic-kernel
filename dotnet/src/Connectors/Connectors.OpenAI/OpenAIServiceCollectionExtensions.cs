@@ -1642,8 +1642,9 @@ public static class OpenAIServiceCollectionExtensions
     /// Adds the OpenAI text-to-audio service to the list.
     /// </summary>
     /// <param name="builder">The <see cref="IKernelBuilder"/> instance to augment.</param>
-    /// <param name="modelId">OpenAI model name, see https://platform.openai.com/docs/models</param>
     /// <param name="apiKey">OpenAI API key, see https://platform.openai.com/account/api-keys</param>
+    /// <param name="modelId">OpenAI model name, see https://platform.openai.com/docs/models</param>
+    /// <param name="endpoint">Custom endpoint.</param>
     /// <param name="orgId">OpenAI organization id. This is usually optional unless your account belongs to multiple organizations.</param>
     /// <param name="serviceId">A local identifier for the given AI service</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
@@ -1651,8 +1652,9 @@ public static class OpenAIServiceCollectionExtensions
     [Experimental("SKEXP0001")]
     public static IKernelBuilder AddOpenAITextToAudio(
         this IKernelBuilder builder,
-        string modelId,
         string apiKey,
+        string modelId,
+        Uri? endpoint = null,
         string? orgId = null,
         string? serviceId = null,
         HttpClient? httpClient = null)
@@ -1663,8 +1665,9 @@ public static class OpenAIServiceCollectionExtensions
 
         builder.Services.AddKeyedSingleton<ITextToAudioService>(serviceId, (serviceProvider, _) =>
             new OpenAITextToAudioService(
-                modelId,
                 apiKey,
+                modelId,
+                endpoint,
                 orgId,
                 HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
                 serviceProvider.GetService<ILoggerFactory>()));

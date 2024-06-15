@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
@@ -17,12 +18,19 @@ namespace Microsoft.SemanticKernel.Connectors.OpenAI;
 [Experimental("SKEXP0001")]
 internal sealed class OpenAITextToAudioClient
 {
+    /// <summary>
+    /// OpenAI REST API endpoint
+    /// </summary>
+    private const string OpenAIEndpoint = "https://api.openai.com/v1/audio/speech";
+
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
 
     private readonly string _modelId;
     private readonly string _apiKey;
     private readonly string? _organization;
+
+    private Uri? Endpoint { get; set; } = null;
 
     /// <summary>
     /// Storage for AI service attributes.
@@ -32,14 +40,16 @@ internal sealed class OpenAITextToAudioClient
     /// <summary>
     /// Creates an instance of the <see cref="OpenAITextToAudioClient"/> with API key auth.
     /// </summary>
-    /// <param name="modelId">Model name</param>
     /// <param name="apiKey">OpenAI API Key</param>
+    /// <param name="modelId">Model name</param>
+    /// <param name="endpoint">Custom endpoint.</param>
     /// <param name="organization">OpenAI Organization Id (usually optional)</param>
     /// <param name="httpClient">Custom <see cref="HttpClient"/> for HTTP requests.</param>
     /// <param name="logger">The <see cref="ILogger"/> to use for logging. If null, no logging will be performed.</param>
     internal OpenAITextToAudioClient(
-        string modelId,
         string apiKey,
+        string modelId,
+        Uri? endpoint,
         string? organization = null,
         HttpClient? httpClient = null,
         ILogger? logger = null)
@@ -50,6 +60,18 @@ internal sealed class OpenAITextToAudioClient
         this._modelId = modelId;
         this._apiKey = apiKey;
         this._organization = organization;
+
+        // Accepts the endpoint if provided, otherwise uses the default OpenAI endpoint.
+        var providedEndpoint = endpoint ?? httpClient?.BaseAddress;
+        if (providedEndpoint is null)
+        {
+            Verify.NotNullOrWhiteSpace(apiKey); // For Public OpenAI Endpoint a key must be provided.
+            this.Endpoint = new Uri(OpenAIEndpoint);
+        }
+        else
+        {
+            this.Endpoint = new Uri(providedEndpoint.ToString().TrimEnd('/') + "/audio/speech");
+        }
 
         this._httpClient = HttpClientProvider.GetHttpClient(httpClient);
         this._logger = logger ?? NullLogger.Instance;
@@ -121,7 +143,7 @@ internal sealed class OpenAITextToAudioClient
             Speed = executionSettings.Speed
         };
 
-        return HttpRequest.CreatePostRequest($"{baseUrl.TrimEnd('/')}/v1/audio/speech", payload);
+        return HttpRequest.CreatePostRequest(this.Endpoint!, payload);
     }
 
     #endregion

@@ -40,6 +40,8 @@ public abstract class KernelPlugin : IEnumerable<KernelFunction>
     /// <summary>Gets a description of the plugin.</summary>
     public string Description { get; }
 
+    public string? ExternalId { get; set; }
+
     /// <summary>Gets the function in the plugin with the specified name.</summary>
     /// <param name="functionName">The name of the function.</param>
     /// <returns>The function.</returns>

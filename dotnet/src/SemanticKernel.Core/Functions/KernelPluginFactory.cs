@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -60,7 +61,8 @@ public static partial class KernelPluginFactory
         var functions = new List<KernelFunction>();
         foreach (MethodInfo method in methods)
         {
-            if (method.GetCustomAttribute<KernelFunctionAttribute>() is not null)
+            var funcAttribute = method.CustomAttributes.FirstOrDefault(p => p.AttributeType.FullName == typeof(KernelFunctionAttribute).FullName);
+            if (funcAttribute is not null)
             {
                 functions.Add(KernelFunctionFactory.CreateFromMethod(method, target, loggerFactory: loggerFactory));
             }

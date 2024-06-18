@@ -10,6 +10,13 @@ namespace Microsoft.SemanticKernel.Connectors.OpenAI;
 internal sealed class TextToImageRequest
 {
     /// <summary>
+    /// Model to use for image generation
+    /// </summary>
+    [JsonPropertyName("model")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Model { get; set; }
+
+    /// <summary>
     /// Image prompt
     /// </summary>
     [JsonPropertyName("prompt")]

@@ -41,12 +41,18 @@ public sealed class OpenAITextToImageService : ITextToImageService
     private Uri? Endpoint { get; set; } = null;
 
     /// <summary>
+    /// The model to use for image generation.
+    /// </summary>
+    private readonly string? _modelId;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="OpenAITextToImageService"/> class.
     /// </summary>
     /// <param name="apiKey">OpenAI API key, see https://platform.openai.com/account/api-keys</param>
     /// <param name="model">Image model.</param>
     /// <param name="endpoint">Open AI custom endpoint.</param>
     /// <param name="organization">OpenAI organization id. This is usually optional unless your account belongs to multiple organizations.</param>
+    /// <param name="modelId">The model to use for image generation.</param>
     /// <param name="httpClient">Custom <see cref="HttpClient"/> for HTTP requests.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for logging. If null, no logging will be performed.</param>
     public OpenAITextToImageService(
@@ -54,12 +60,14 @@ public sealed class OpenAITextToImageService : ITextToImageService
         string model,
         Uri? endpoint,
         string? organization = null,
+        string? modelId = null,
         HttpClient? httpClient = null,
         ILoggerFactory? loggerFactory = null)
     {
         Verify.NotNullOrWhiteSpace(apiKey);
         this._authorizationHeaderValue = $"Bearer {apiKey}";
         this._organizationHeaderValue = organization;
+        this._modelId = modelId;
 
         if (!string.IsNullOrEmpty(model))
         {
@@ -80,7 +88,10 @@ public sealed class OpenAITextToImageService : ITextToImageService
 
         this._core = new(httpClient, loggerFactory?.CreateLogger(this.GetType()));
         this._core.AddAttribute(OpenAIClientCore.OrganizationKey, organization);
-        this._core.AddAttribute(AIServiceExtensions.ModelIdKey, this._modelId);
+        if (modelId is not null)
+        {
+            this._core.AddAttribute(AIServiceExtensions.ModelIdKey, modelId);
+        }
 
         this._core.RequestCreated += (_, request) =>
         {
@@ -103,6 +114,7 @@ public sealed class OpenAITextToImageService : ITextToImageService
     }
 
     private async Task<string> GenerateImageAsync(
+        string? model,
         string description,
         DrawExecutionSettings settings,
         Func<TextToImageResponse.Image, string> extractResponse,
@@ -113,6 +125,7 @@ public sealed class OpenAITextToImageService : ITextToImageService
         var drawExecutionSettings = OpenAIDrawExecutionSettings.FromExecutionSettings(settings);
         var requestBody = JsonSerializer.Serialize(new TextToImageRequest
         {
+            Model = model,
             Prompt = description,
             Size = $"{drawExecutionSettings.Width}x{drawExecutionSettings.Height}",
             Count = drawExecutionSettings.Number,

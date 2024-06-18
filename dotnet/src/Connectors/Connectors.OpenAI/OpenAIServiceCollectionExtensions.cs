@@ -1310,7 +1310,6 @@ public static class OpenAIServiceCollectionExtensions
     /// </summary>
     /// <param name="builder">The <see cref="IKernelBuilder"/> instance to augment.</param>
     /// <param name="apiKey">OpenAI API key, see https://platform.openai.com/account/api-keys</param>
-    /// <param name="modelId">Model id.</param>
     /// <param name="endpoint">Custom endpoint</param>
     /// <param name="orgId">OpenAI organization id. This is usually optional unless your account belongs to multiple organizations.</param>
     /// <param name="modelId">The model to use for image generation.</param>
@@ -1324,7 +1323,6 @@ public static class OpenAIServiceCollectionExtensions
         string modelId,
         Uri? endpoint = null,
         string? orgId = null,
-        string? modelId = null,
         string? serviceId = null,
         HttpClient? httpClient = null)
     {
@@ -1337,7 +1335,6 @@ public static class OpenAIServiceCollectionExtensions
                 modelId,
                 endpoint,
                 orgId,
-                modelId,
                 HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
                 serviceProvider.GetService<ILoggerFactory>()));
 
@@ -1352,7 +1349,6 @@ public static class OpenAIServiceCollectionExtensions
     /// <param name="model">OpenAI image model.</param>
     /// <param name="endpoint">Custom endpoint.</param>
     /// <param name="orgId">OpenAI organization id. This is usually optional unless your account belongs to multiple organizations.</param>
-    /// <param name="modelId">The model to use for image generation.</param>
     /// <param name="serviceId">A local identifier for the given AI service</param>
     /// <returns>The same instance as <paramref name="services"/>.</returns>
     [Experimental("SKEXP0010")]
@@ -1361,7 +1357,6 @@ public static class OpenAIServiceCollectionExtensions
         string model,
         Uri? endpoint = null,
         string? orgId = null,
-        string? modelId = null,
         string? serviceId = null)
     {
         Verify.NotNull(services);
@@ -1373,7 +1368,6 @@ public static class OpenAIServiceCollectionExtensions
                 model,
                 endpoint,
                 orgId,
-                modelId,
                 HttpClientProvider.GetHttpClient(serviceProvider),
                 serviceProvider.GetService<ILoggerFactory>()));
     }

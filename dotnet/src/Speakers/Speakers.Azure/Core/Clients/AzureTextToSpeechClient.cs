@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Microsoft.Extensions.Logging;
+using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +31,6 @@ internal sealed class AzureTextToSpeechClient : ClientBase
     {
         using var request = this.CreateHttpRequest(text, (AzureTextToAudioExecutionSettings)settings, this._accessKey);
         var data = await this.SendRequestAndGetBytesAsync(request, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-        return data == null ? throw new KernelException("Failed to generate audio content.") : new AudioContent(data);
+        return data == null ? throw new KernelException("Failed to generate audio content.") : new AudioContent(new ReadOnlyMemory<byte>(data!), "audio/wav");
     }
 }

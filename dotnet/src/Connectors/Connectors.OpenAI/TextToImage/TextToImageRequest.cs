@@ -39,10 +39,4 @@ internal sealed class TextToImageRequest
     /// </summary>
     [JsonPropertyName("response_format")]
     public string Format { get; set; } = "url";
-
-    /// <summary>
-    /// Image model.
-    /// </summary>
-    [JsonPropertyName("model")]
-    public string Model { get; set; } = string.Empty;
 }

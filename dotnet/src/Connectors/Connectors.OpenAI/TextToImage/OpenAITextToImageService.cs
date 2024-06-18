@@ -36,8 +36,6 @@ public sealed class OpenAITextToImageService : ITextToImageService
     /// </summary>
     private readonly string _authorizationHeaderValue;
 
-    private readonly string? _modelId = "dall-e-3";
-
     private Uri? Endpoint { get; set; } = null;
 
     /// <summary>
@@ -60,14 +58,12 @@ public sealed class OpenAITextToImageService : ITextToImageService
         string model,
         Uri? endpoint,
         string? organization = null,
-        string? modelId = null,
         HttpClient? httpClient = null,
         ILoggerFactory? loggerFactory = null)
     {
         Verify.NotNullOrWhiteSpace(apiKey);
         this._authorizationHeaderValue = $"Bearer {apiKey}";
         this._organizationHeaderValue = organization;
-        this._modelId = modelId;
 
         if (!string.IsNullOrEmpty(model))
         {
@@ -88,9 +84,9 @@ public sealed class OpenAITextToImageService : ITextToImageService
 
         this._core = new(httpClient, loggerFactory?.CreateLogger(this.GetType()));
         this._core.AddAttribute(OpenAIClientCore.OrganizationKey, organization);
-        if (modelId is not null)
+        if (this._modelId is not null)
         {
-            this._core.AddAttribute(AIServiceExtensions.ModelIdKey, modelId);
+            this._core.AddAttribute(AIServiceExtensions.ModelIdKey, this._modelId);
         }
 
         this._core.RequestCreated += (_, request) =>
@@ -114,7 +110,6 @@ public sealed class OpenAITextToImageService : ITextToImageService
     }
 
     private async Task<string> GenerateImageAsync(
-        string? model,
         string description,
         DrawExecutionSettings settings,
         Func<TextToImageResponse.Image, string> extractResponse,
@@ -125,7 +120,6 @@ public sealed class OpenAITextToImageService : ITextToImageService
         var drawExecutionSettings = OpenAIDrawExecutionSettings.FromExecutionSettings(settings);
         var requestBody = JsonSerializer.Serialize(new TextToImageRequest
         {
-            Model = model,
             Prompt = description,
             Size = $"{drawExecutionSettings.Width}x{drawExecutionSettings.Height}",
             Count = drawExecutionSettings.Number,

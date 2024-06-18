@@ -36,7 +36,7 @@ This optional `env_file_path` parameter will allow pydantic settings to use the 
 
 If using the second method, we suggest adding a copy of the `.env` file under these folders:
 
-- [python/tests](tests)
+- [./tests](./tests)
 - [./samples/getting_started](./samples/getting_started).
 
 ## System setup
@@ -77,13 +77,46 @@ Poetry allows to use SK from the local files, without worrying about paths, as
 if you had SK pip package installed.
 
 To install Poetry in your system, first, navigate to the directory containing
-this README using your chosen shell. You will need to have Python 3.8+ installed.
+this README using your chosen shell. You will need to have Python 3.10, 3.11, or 3.12
+installed.
 
 Install the Poetry package manager and create a project virtual environment.
 Note: SK requires at least Poetry 1.2.0.
 
+### Note for MacOS Users
+
+It is best to install Poetry using their 
+[official installer](https://python-poetry.org/docs/#installing-with-the-official-installer).
+
+On MacOS, you might find that `python` commands are not recognized by default, 
+and you can only use `python3`. To make it easier to run `python ...` commands 
+(which Poetry requires), you can create an alias in your shell configuration file.
+
+Follow these steps:
+
+1. **Open your shell configuration file**:
+    - For **Bash**: `nano ~/.bash_profile` or `nano ~/.bashrc`
+    - For **Zsh** (default on macOS Catalina and later): `nano ~/.zshrc`
+
+2. **Add the alias**:
+    ```sh
+    alias python='python3'
+    ```
+
+3. **Save the file and exit**:
+    - In `nano`, press `CTRL + X`, then `Y`, and hit `Enter`.
+
+4. **Apply the changes**:
+    - For **Bash**: `source ~/.bash_profile` or `source ~/.bashrc`
+    - For **Zsh**: `source ~/.zshrc`
+
+After these steps, you should be able to use `python` in your terminal to run 
+Python 3 commands.
+
+### Poetry Installation
+
 ```bash
-# Install poetry package
+# Install poetry package if not choosing to install via their official installer
 pip3 install poetry
 
 # optionally, define which python version you want to use
@@ -106,19 +139,24 @@ poetry run pre-commit install
 
 ## VSCode Setup
 
+Open the [workspace](https://code.visualstudio.com/docs/editor/workspaces) in VSCode.
+> The Python workspace is the `./python` folder if you are at the root of the repository.
+
 Open any of the `.py` files in the project and run the `Python: Select Interpreter`
 command from the command palette. Make sure the virtual env (venv) created by
 `poetry` is selected.
 The python you're looking for should be under `~/.cache/pypoetry/virtualenvs/semantic-kernel-.../bin/python`.
 
-If prompted, install `ruff` and `black` (these should have been installed as part of `poetry install`).
+If prompted, install `ruff`. (It should have been installed as part of `poetry install`).
+
+You also need to install the `ruff` extension in VSCode so that auto-formatting uses the `ruff` formatter on save.
+Read more about the extension here: https://github.com/astral-sh/ruff-vscode
 
 ## Tests
 
 You can run the unit tests under the [tests/unit](tests/unit/) folder.
 
 ```bash
-    cd python
     poetry install
     poetry run pytest tests/unit
 ```
@@ -129,7 +167,6 @@ Alternatively, you can run them using VSCode Tasks. Open the command palette
 You can run the integration tests under the [tests/integration](tests/integration/) folder.
 
 ```bash
-    cd python
     poetry install
     poetry run pytest tests/integration
 ```
@@ -137,7 +174,6 @@ You can run the integration tests under the [tests/integration](tests/integratio
 You can also run all the tests together under the [tests](tests/) folder.
 
 ```bash
-    cd python
     poetry install
     poetry run pytest tests
 ```
@@ -294,7 +330,6 @@ Ideally you should run these checks before committing any changes, use `poetry r
 We try to maintain a high code coverage for the project. To run the code coverage on the unit tests, you can use the following command:
 
 ```bash
-    cd python
     poetry run pytest --cov=semantic_kernel --cov-report=term-missing:skip-covered tests/unit/
 ```
 or use the following task (using `Ctrl+Shift+P`):

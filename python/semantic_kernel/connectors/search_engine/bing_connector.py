@@ -62,25 +62,38 @@ class BingConnector(ConnectorBase):
 
         _base_url = (
             "https://api.bing.microsoft.com/v7.0/custom/search"
-            if self._custom_config
+            if self._settings.custom_config
             else "https://api.bing.microsoft.com/v7.0/search"
         )
-        _request_url = f"{_base_url}?q={urllib.parse.quote_plus(query)}&count={num_results}&offset={offset}" + (
-            f"&customConfig={self._custom_config}" if self._custom_config else ""
+        _request_url = (
+            f"{_base_url}?q={urllib.parse.quote_plus(query)}&count={num_results}&offset={offset}"
+            + (
+                f"&customConfig={self._settings.custom_config}"
+                if self._settings.custom_config
+                else ""
+            )
         )
 
         logger.info(f"Sending GET request to {_request_url}")
 
         headers = {"Ocp-Apim-Subscription-Key": self._settings.api_key.get_secret_value()}
 
-        async with (
-            aiohttp.ClientSession() as session,
-            session.get(_request_url, headers=headers, raise_for_status=True) as response,
-        ):
-            if response.status == 200:
-                data = await response.json()
-                pages = data.get("webPages", {}).get("value")
-                if pages:
-                    return list(map(lambda x: x["snippet"], pages)) or []
-                return None
-            return []
+        try:
+            async with aiohttp.ClientSession() as session, session.get(_request_url, headers=headers) as response:
+                response.raise_for_status()
+                if response.status == 200:
+                    data = await response.json()
+                    pages = data.get("webPages", {}).get("value")
+                    if pages:
+                        return list(map(lambda x: x["snippet"], pages)) or []
+                    return None
+                return []
+        except aiohttp.ClientResponseError as ex:
+            logger.error(f"Failed to get search results: {ex}")
+            raise ServiceInvalidRequestError("Failed to get search results.") from ex
+        except aiohttp.ClientError as ex:
+            logger.error(f"Client error occurred: {ex}")
+            raise ServiceInvalidRequestError("A client error occurred while getting search results.") from ex
+        except Exception as ex:
+            logger.error(f"An unexpected error occurred: {ex}")
+            raise ServiceInvalidRequestError("An unexpected error occurred while getting search results.") from ex

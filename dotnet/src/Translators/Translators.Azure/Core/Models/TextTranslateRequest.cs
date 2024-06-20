@@ -1,4 +1,4 @@
-﻿// Copyright (c) Richasy. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -9,12 +9,12 @@ internal sealed class TextTranslateRequest : IEnumerable<TextTranslateRequest.Te
 {
     private readonly List<TextItem> _textItems = new();
 
-    public IEnumerator<TextItem> GetEnumerator() => _textItems.GetEnumerator();
+    public IEnumerator<TextItem> GetEnumerator() => this._textItems.GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
     public void AddText(string text)
-        => _textItems.Add(new TextItem() { Text = text });
+        => this._textItems.Add(new TextItem() { Text = text });
 
     internal sealed class TextItem
     {

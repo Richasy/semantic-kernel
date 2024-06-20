@@ -1,4 +1,4 @@
-﻿// Copyright (c) Richasy. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Text.Json.Serialization;
 

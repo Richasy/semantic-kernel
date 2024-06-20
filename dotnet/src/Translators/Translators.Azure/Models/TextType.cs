@@ -1,4 +1,4 @@
-﻿// Copyright (c) Richasy. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 
 namespace Microsoft.SemanticKernel.Translators.Azure.Models;
 

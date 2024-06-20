@@ -1,9 +1,8 @@
-﻿// Copyright (c) Richasy. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Translate;
 using Microsoft.SemanticKernel.Translators.Youdao;
 

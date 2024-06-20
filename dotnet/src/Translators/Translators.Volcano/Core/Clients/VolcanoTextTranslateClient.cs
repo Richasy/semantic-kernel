@@ -1,14 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Collections.Generic;
-using System.Net.Http;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
-using System.Threading;
-using static System.Net.Mime.MediaTypeNames;
 using System.Linq;
-using System.Text.Json;
-using System.Text;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.SemanticKernel.Translators.Volcano.Core;
 

@@ -11,7 +11,7 @@
     <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
-  <Import Project="$(RepoRoot)/dotnet/nuget/nuget-package.props" />
+  
 
   <PropertyGroup>
     <!-- NuGet Package Settings -->

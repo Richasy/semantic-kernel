@@ -1,4 +1,4 @@
-﻿// Copyright (c) Richasy. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
 using System.Collections.Generic;
@@ -71,8 +71,7 @@ internal abstract class ClientBase
         queryList.Add("to", requestSettings.To!);
         queryList.Add("appKey", this._appId);
         queryList.Add("salt", this._salt);
-        string? currentTime;
-        queryList.Add("sign", this.GenerateSign(input, out currentTime));
+        queryList.Add("sign", this.GenerateSign(input, out string? currentTime));
         queryList.Add("signType", "v3");
         queryList.Add("curtime", currentTime);
 

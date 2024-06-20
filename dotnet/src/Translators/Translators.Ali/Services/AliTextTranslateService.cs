@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Collections.Generic;
-using Microsoft.SemanticKernel.Translate;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.SemanticKernel.Translate;
 using Microsoft.SemanticKernel.Translators.Ali.Core;
 
 namespace Microsoft.SemanticKernel.Translators.Ali;

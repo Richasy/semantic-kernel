@@ -1,12 +1,12 @@
-﻿// Copyright (c) Richasy. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel.Translate;
 using Microsoft.SemanticKernel.Http;
+using Microsoft.SemanticKernel.Translate;
 using Microsoft.SemanticKernel.Translators.Baidu.Core;
 
 namespace Microsoft.SemanticKernel.Translators.Baidu;

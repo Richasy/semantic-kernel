@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Sockets;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +17,6 @@ internal sealed class SparkImageGenerationClient : ClientBase
     private readonly string? _apiKey;
     private readonly string? _secret;
     private readonly string? _version;
-    private readonly Uri _textToImageEndpoint;
 
     public SparkImageGenerationClient(
         string apiKey,

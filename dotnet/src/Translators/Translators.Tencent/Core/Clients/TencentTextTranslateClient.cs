@@ -2,9 +2,9 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.SemanticKernel.Translators.Tencent.Core;
 

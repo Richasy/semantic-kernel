@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using Microsoft.SemanticKernel.Connectors.QianFan.Core;
 using System.Collections.Generic;
-using Microsoft.SemanticKernel.TextToImage;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel.Connectors.QianFan.Core;
 using Microsoft.SemanticKernel.Http;
 using Microsoft.SemanticKernel.Services;
-using System.Threading.Tasks;
-using System.Threading;
+using Microsoft.SemanticKernel.TextToImage;
 
 namespace Microsoft.SemanticKernel.Connectors.QianFan;
 

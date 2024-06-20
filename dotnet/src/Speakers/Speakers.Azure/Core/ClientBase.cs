@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Logging;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Threading;
 using System;
-using Microsoft.SemanticKernel.Http;
+using System.Net.Http;
 using System.Security;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.SemanticKernel.Http;
 
 namespace Microsoft.SemanticKernel.Speakers.Azure.Core;
 

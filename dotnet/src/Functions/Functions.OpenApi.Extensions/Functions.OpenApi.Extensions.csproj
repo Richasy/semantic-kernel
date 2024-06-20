@@ -7,7 +7,7 @@
     <VersionSuffix>alpha</VersionSuffix>
     <NoWarn>$(NoWarn);SKEXP0040</NoWarn>
   </PropertyGroup>
-  <Import Project="$(RepoRoot)/dotnet/nuget/nuget-package.props" />
+  
   <PropertyGroup>
     <!-- NuGet Package Settings -->
     <Title>Semantic Kernel - OpenAPI Plugin Extensions</Title>

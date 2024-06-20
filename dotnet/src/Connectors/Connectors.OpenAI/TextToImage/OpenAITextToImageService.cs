@@ -50,7 +50,6 @@ public sealed class OpenAITextToImageService : ITextToImageService
     /// <param name="model">Image model.</param>
     /// <param name="endpoint">Open AI custom endpoint.</param>
     /// <param name="organization">OpenAI organization id. This is usually optional unless your account belongs to multiple organizations.</param>
-    /// <param name="modelId">The model to use for image generation.</param>
     /// <param name="httpClient">Custom <see cref="HttpClient"/> for HTTP requests.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for logging. If null, no logging will be performed.</param>
     public OpenAITextToImageService(

@@ -670,6 +670,10 @@ internal abstract class ClientCore
                                 break;
                             }
                         }
+                        catch (ArgumentNullException)
+                        {
+                            break;
+                        }
                         catch (Exception ex) when (activity is not null)
                         {
                             activity.SetError(ex);

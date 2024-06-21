@@ -124,20 +124,17 @@ internal sealed class QianFanChatCompletionClient : ClientBase
     {
         var state = ValidateInputAndCreateChatCompletionState(chatHistory, kernel, executionSettings);
 
-        for (state.Iteration = 1; ; state.Iteration++)
-        {
-            state.QianFanRequest.Stream = true;
-            await this.EnsureAuthTokenAsync().ConfigureAwait(false);
-            using var httpRequestMessage = this.CreateHttpRequest(state.QianFanRequest, this._chatGenerationEndpoint);
-            using var response = await this.SendRequestAndGetResponseImmediatelyAfterHeadersReadAsync(httpRequestMessage, cancellationToken)
-                .ConfigureAwait(false);
-            using var responseStream = await response.Content.ReadAsStreamAndTranslateExceptionAsync()
-                .ConfigureAwait(false);
+        state.QianFanRequest.Stream = true;
+        await this.EnsureAuthTokenAsync().ConfigureAwait(false);
+        using var httpRequestMessage = this.CreateHttpRequest(state.QianFanRequest, this._chatGenerationEndpoint);
+        using var response = await this.SendRequestAndGetResponseImmediatelyAfterHeadersReadAsync(httpRequestMessage, cancellationToken)
+            .ConfigureAwait(false);
+        using var responseStream = await response.Content.ReadAsStreamAndTranslateExceptionAsync()
+            .ConfigureAwait(false);
 
-            await foreach (var messageContent in this.GetStreamingChatMessageContentsOrPopulateStateForToolCallingAsync(state, responseStream, cancellationToken).ConfigureAwait(false))
-            {
-                yield return messageContent;
-            }
+        await foreach (var messageContent in this.GetStreamingChatMessageContentsOrPopulateStateForToolCallingAsync(state, responseStream, cancellationToken).ConfigureAwait(false))
+        {
+            yield return messageContent;
         }
     }
 
@@ -269,7 +266,10 @@ internal sealed class QianFanChatCompletionClient : ClientBase
                 throw new KernelException("Prompt was blocked due to QianFan API safety reasons.");
             }
 
-            throw new KernelException("QianFan API doesn't return any data.");
+            if (qianFanResponse.FinishReason != QianFanFinishReason.Normal)
+            {
+                throw new KernelException("QianFan API doesn't return any data.");
+            }
         }
     }
 

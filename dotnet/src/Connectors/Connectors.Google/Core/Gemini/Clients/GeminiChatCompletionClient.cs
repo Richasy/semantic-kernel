@@ -90,12 +90,14 @@ internal sealed class GeminiChatCompletionClient : ClientBase
     /// <param name="httpClient">HttpClient instance used to send HTTP requests</param>
     /// <param name="modelId">Id of the model supporting chat completion</param>
     /// <param name="apiKey">Api key for GoogleAI endpoint</param>
+    /// <param name="endpoint">Custom endpoint.</param>
     /// <param name="apiVersion">Version of the Google API</param>
     /// <param name="logger">Logger instance used for logging (optional)</param>
     public GeminiChatCompletionClient(
         HttpClient httpClient,
         string modelId,
         string apiKey,
+        Uri? endpoint,
         GoogleAIVersion apiVersion,
         ILogger? logger = null)
         : base(
@@ -107,9 +109,12 @@ internal sealed class GeminiChatCompletionClient : ClientBase
 
         string versionSubLink = GetApiVersionSubLink(apiVersion);
 
+        // Accepts the endpoint if provided, otherwise uses the default OpenAI endpoint.
+        var providedEndpoint = endpoint ?? new Uri("https://generativelanguage.googleapis.com");
+
         this._modelId = modelId;
-        this._chatGenerationEndpoint = new Uri($"https://generativelanguage.googleapis.com/{versionSubLink}/models/{this._modelId}:generateContent?key={apiKey}");
-        this._chatStreamingEndpoint = new Uri($"https://generativelanguage.googleapis.com/{versionSubLink}/models/{this._modelId}:streamGenerateContent?key={apiKey}&alt=sse");
+        this._chatGenerationEndpoint = new Uri($"{providedEndpoint.AbsoluteUri.TrimEnd('/')}/{versionSubLink}/models/{this._modelId}:generateContent?key={apiKey}");
+        this._chatStreamingEndpoint = new Uri($"{providedEndpoint.AbsoluteUri.TrimEnd('/')}/{versionSubLink}/models/{this._modelId}:streamGenerateContent?key={apiKey}&alt=sse");
     }
 
     /// <summary>

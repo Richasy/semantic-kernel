@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -19,6 +20,7 @@ public static class GoogleAIServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The service collection to add the Gemini Text Generation service to.</param>
     /// <param name="modelId">The model for text generation.</param>
+    /// <param name="endpoint">Custom endpoint.</param>
     /// <param name="apiKey">The API key for authentication Gemini API.</param>
     /// <param name="apiVersion">The version of the Google API.</param>
     /// <param name="serviceId">Optional service ID.</param>
@@ -26,6 +28,7 @@ public static class GoogleAIServiceCollectionExtensions
     public static IServiceCollection AddGoogleAIGeminiChatCompletion(
         this IServiceCollection services,
         string modelId,
+        Uri endpoint,
         string apiKey,
         GoogleAIVersion apiVersion = GoogleAIVersion.V1_Beta, // todo: change beta to stable when stable version will be available
         string? serviceId = null)
@@ -37,6 +40,7 @@ public static class GoogleAIServiceCollectionExtensions
         services.AddKeyedSingleton<IChatCompletionService>(serviceId, (serviceProvider, _) =>
             new GoogleAIGeminiChatCompletionService(
                 modelId: modelId,
+                endpoint: endpoint,
                 apiKey: apiKey,
                 apiVersion: apiVersion,
                 httpClient: HttpClientProvider.GetHttpClient(serviceProvider),

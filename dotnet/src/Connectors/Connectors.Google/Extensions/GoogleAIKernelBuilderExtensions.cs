@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,7 @@ public static class GoogleAIKernelBuilderExtensions
     /// </summary>
     /// <param name="builder">The kernel builder.</param>
     /// <param name="modelId">The model for text generation.</param>
+    /// <param name="endpoint">Custom endpoint.</param>
     /// <param name="apiKey">The API key for authentication Gemini API.</param>
     /// <param name="apiVersion">The version of the Google API.</param>
     /// <param name="serviceId">The optional service ID.</param>
@@ -28,6 +30,7 @@ public static class GoogleAIKernelBuilderExtensions
     public static IKernelBuilder AddGoogleAIGeminiChatCompletion(
         this IKernelBuilder builder,
         string modelId,
+        Uri endpoint,
         string apiKey,
         GoogleAIVersion apiVersion = GoogleAIVersion.V1_Beta, // todo: change beta to stable when stable version will be available
         string? serviceId = null,
@@ -41,6 +44,7 @@ public static class GoogleAIKernelBuilderExtensions
             new GoogleAIGeminiChatCompletionService(
                 modelId: modelId,
                 apiKey: apiKey,
+                endpoint: endpoint,
                 apiVersion: apiVersion,
                 httpClient: HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
                 loggerFactory: serviceProvider.GetService<ILoggerFactory>()));

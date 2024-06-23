@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -24,12 +25,14 @@ public sealed class GoogleAIGeminiChatCompletionService : IChatCompletionService
     /// Initializes a new instance of the <see cref="GoogleAIGeminiChatCompletionService"/> class.
     /// </summary>
     /// <param name="modelId">The Gemini model for the chat completion service.</param>
+    /// <param name="endpoint">Custom endpoint.</param>
     /// <param name="apiKey">The API key for authentication.</param>
     /// <param name="apiVersion">Version of the Google API</param>
     /// <param name="httpClient">Optional HTTP client to be used for communication with the Gemini API.</param>
     /// <param name="loggerFactory">Optional logger factory to be used for logging.</param>
     public GoogleAIGeminiChatCompletionService(
         string modelId,
+        Uri endpoint,
         string apiKey,
         GoogleAIVersion apiVersion = GoogleAIVersion.V1_Beta, // todo: change beta to stable when stable version will be available
         HttpClient? httpClient = null,
@@ -38,14 +41,24 @@ public sealed class GoogleAIGeminiChatCompletionService : IChatCompletionService
         Verify.NotNullOrWhiteSpace(modelId);
         Verify.NotNullOrWhiteSpace(apiKey);
 
+        Uri? internalClientEndpoint = null;
+        internalClientEndpoint = endpoint ?? httpClient?.BaseAddress;
+
         this._chatCompletionClient = new GeminiChatCompletionClient(
 #pragma warning disable CA2000
             httpClient: HttpClientProvider.GetHttpClient(httpClient),
 #pragma warning restore CA2000
             modelId: modelId,
             apiKey: apiKey,
+            endpoint: internalClientEndpoint,
             apiVersion: apiVersion,
             logger: loggerFactory?.CreateLogger(typeof(GoogleAIGeminiChatCompletionService)));
+
+        if (internalClientEndpoint != null)
+        {
+            this._attributesInternal.Add(AIServiceExtensions.EndpointKey, internalClientEndpoint);
+        }
+
         this._attributesInternal.Add(AIServiceExtensions.ModelIdKey, modelId);
     }
 

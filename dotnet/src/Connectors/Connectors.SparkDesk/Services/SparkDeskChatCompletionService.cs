@@ -24,13 +24,13 @@ public sealed class SparkDeskChatCompletionService : IChatCompletionService
     /// <param name="apiKey">The API key for authentication.</param>
     /// <param name="secret">Secret.</param>
     /// <param name="appId">App id.</param>
-    /// <param name="apiVersion">Version of the Google API</param>
+    /// <param name="modelId">Version of the Spark API</param>
     /// <param name="loggerFactory">Optional logger factory to be used for logging.</param>
     public SparkDeskChatCompletionService(
         string apiKey,
         string secret,
         string appId,
-        SparkDeskTextVersion apiVersion = SparkDeskTextVersion.V3_5,
+        string modelId,
         ILoggerFactory? loggerFactory = null)
     {
         Verify.NotNullOrWhiteSpace(apiKey);
@@ -39,9 +39,9 @@ public sealed class SparkDeskChatCompletionService : IChatCompletionService
             apiKey: apiKey,
             secret: secret,
             appId: appId,
-            apiVersion: apiVersion,
+            modelId: modelId,
             logger: loggerFactory?.CreateLogger(typeof(SparkDeskChatCompletionService)));
-        this._attributesInternal.Add(AIServiceExtensions.ModelIdKey, apiVersion.ToString());
+        this._attributesInternal.Add(AIServiceExtensions.ModelIdKey, modelId);
     }
 
     /// <inheritdoc />

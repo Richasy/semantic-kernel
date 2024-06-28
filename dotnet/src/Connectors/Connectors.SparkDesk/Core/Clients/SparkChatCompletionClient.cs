@@ -17,7 +17,7 @@ namespace Microsoft.SemanticKernel.Connectors.SparkDesk.Core;
 
 internal sealed class SparkChatCompletionClient : ClientBase
 {
-    private readonly SparkDeskTextVersion _version;
+    private readonly string _modelId;
     private readonly string? _appId;
     private readonly Uri _chatStreamingEndpoint;
 
@@ -82,23 +82,24 @@ internal sealed class SparkChatCompletionClient : ClientBase
     /// <param name="apiKey">Api key for Spark Desk endpoint</param>
     /// <param name="secret">Secret for Spark Desk</param>
     /// <param name="appId">App ID for Spark Desk endpoint</param>
-    /// <param name="apiVersion">Version of the Google API</param>
+    /// <param name="modelId">Model id.</param>
     /// <param name="logger">Logger instance used for logging (optional)</param>
     public SparkChatCompletionClient(
         string apiKey,
         string secret,
         string appId,
-        SparkDeskTextVersion apiVersion,
+        string modelId,
         ILogger? logger = null)
         : base(logger: logger)
     {
         Verify.NotNullOrWhiteSpace(apiKey);
         Verify.NotNullOrWhiteSpace(secret);
         Verify.NotNullOrWhiteSpace(appId);
+        Verify.NotNullOrWhiteSpace(modelId);
 
         this._appId = appId;
-        this._version = apiVersion;
-        string chatUrl = GetAuthorizationUrl(apiKey, secret, GetHostApi(apiVersion) + "/chat");
+        this._modelId = modelId;
+        string chatUrl = GetAuthorizationUrl(apiKey, secret, $"{BaseUrl}/{modelId}/chat");
         this._chatStreamingEndpoint = new Uri(chatUrl);
     }
 
@@ -113,11 +114,11 @@ internal sealed class SparkChatCompletionClient : ClientBase
         await foreach (var res in this.StreamGenerateChatMessageAsync(chatHistory, executionSettings, kernel, cancellationToken).ConfigureAwait(false))
         {
             var r = res as SparkStreamingChatMessageContent;
-            chatMessageContents.Add(new SparkChatMessageContent(res.Role ?? AuthorRole.Assistant, res.Content, res.ModelId ?? this._version.ToString(), r!.CalledToolResult, r.Metadata));
+            chatMessageContents.Add(new SparkChatMessageContent(res.Role ?? AuthorRole.Assistant, res.Content, res.ModelId ?? this._modelId, r!.CalledToolResult, r.Metadata));
         }
 
         var contents = string.Join(string.Empty, chatMessageContents.Select(p => p.Content));
-        return [new SparkChatMessageContent(AuthorRole.Assistant, contents, this._version.ToString())];
+        return [new SparkChatMessageContent(AuthorRole.Assistant, contents, this._modelId)];
     }
 
     public async IAsyncEnumerable<StreamingChatMessageContent> StreamGenerateChatMessageAsync(
@@ -248,8 +249,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
         SparkDeskPromptExecutionSettings sparkExecutionSettings,
         Kernel? kernel)
     {
-        sparkExecutionSettings.Version = this._version;
-        var sparkRequest = SparkTextRequest.FromChatHistoryAndExecutionSettings(chatHistory, sparkExecutionSettings);
+        var sparkRequest = SparkTextRequest.FromChatHistoryAndExecutionSettings(chatHistory, sparkExecutionSettings, this._modelId);
         sparkRequest.Header = new SparkRequestHeader { AppId = this._appId };
         sparkExecutionSettings.ToolCallBehavior?.ConfigureSparkTextRequest(kernel, sparkRequest);
         return sparkRequest;
@@ -361,7 +361,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
 
         var message = new SparkChatMessageContent(AuthorRole.Tool,
             content: errorMessage ?? string.Empty,
-            modelId: this._version.ToString(),
+            modelId: this._modelId,
             calledToolResult: functionResponse != null ? new(tool, functionResponse) : null,
             metadata: null);
 
@@ -402,7 +402,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
         return new SparkChatMessageContent(
             role: candidate?.Role ?? AuthorRole.Assistant,
             content: candidate?.Content ?? string.Empty,
-            modelId: this._version.ToString(),
+            modelId: this._modelId,
             functionsToolCalls: toolCalls,
             metadata: GetResponseMetadata(sparkResponse));
     }
@@ -414,7 +414,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
             return new SparkStreamingChatMessageContent(
                 role: message.Role,
                 content: message.Content,
-                modelId: this._version.ToString(),
+                modelId: this._modelId,
                 calledToolResult: message.CalledToolResult,
                 metadata: message.Metadata);
         }
@@ -424,7 +424,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
             return new SparkStreamingChatMessageContent(
                 role: message.Role,
                 content: message.Content,
-                modelId: this._version.ToString(),
+                modelId: this._modelId,
                 toolCalls: message.ToolCalls,
                 metadata: message.Metadata);
         }
@@ -432,7 +432,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
         return new SparkStreamingChatMessageContent(
             role: message.Role,
             content: message.Content,
-            modelId: this._version.ToString(),
+            modelId: this._modelId,
             metadata: message.Metadata);
     }
 

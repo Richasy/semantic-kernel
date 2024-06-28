@@ -55,10 +55,11 @@ internal sealed class SparkTextRequest
 
     public static SparkTextRequest FromChatHistoryAndExecutionSettings(
         ChatHistory chatHistory,
-        SparkDeskPromptExecutionSettings executionSettings)
+        SparkDeskPromptExecutionSettings executionSettings,
+        string modelId)
     {
         var obj = CreateSparkTextRequest(chatHistory);
-        AddConfiguration(executionSettings, obj);
+        AddConfiguration(executionSettings, obj, modelId);
         return obj;
     }
 
@@ -87,9 +88,9 @@ internal sealed class SparkTextRequest
         };
     }
 
-    private static void AddConfiguration(SparkDeskPromptExecutionSettings executionSettings, SparkTextRequest request)
+    private static void AddConfiguration(SparkDeskPromptExecutionSettings executionSettings, SparkTextRequest request, string modelId)
     {
-        request.Parameter = new SparkTextRequestParametersContainer { Chat = new SparkRequestParameters(executionSettings) };
+        request.Parameter = new SparkTextRequestParametersContainer { Chat = new SparkRequestParameters(executionSettings, modelId) };
     }
 
     internal sealed class SparkTextRequestParametersContainer
@@ -105,18 +106,19 @@ internal sealed class SparkTextRequest
         {
         }
 
-        public SparkRequestParameters(SparkDeskPromptExecutionSettings settings)
+        public SparkRequestParameters(SparkDeskPromptExecutionSettings settings, string modelId)
         {
             this.Temperature = settings.Temperature;
             this.TopK = settings.TopK;
             this.MaxTokens = settings.MaxTokens;
             this.ChatId = settings.ChatId;
-            this.Domain = settings.Version switch
+            this.Domain = modelId switch
             {
-                SparkDeskTextVersion.V1_5 => "general",
-                SparkDeskTextVersion.V2 => "generalv2",
-                SparkDeskTextVersion.V3 => "generalv3",
-                SparkDeskTextVersion.V3_5 => "generalv3.5",
+                "v1.1" => "general",
+                "v2.1" => "generalv2",
+                "v3.1" => "generalv3",
+                "v3.5" => "generalv3.5",
+                "v4.0" => "4.0Ultra",
                 _ => default,
             };
         }

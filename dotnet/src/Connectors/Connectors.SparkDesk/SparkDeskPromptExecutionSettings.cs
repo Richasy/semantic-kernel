@@ -19,7 +19,6 @@ public sealed class SparkDeskPromptExecutionSettings : PromptExecutionSettings
     private int? _topK;
     private int? _maxTokens;
     private string? _chatId;
-    private SparkDeskTextVersion _version;
     private SparkDeskToolCallBehavior? _toolCallBehavior;
 
     /// <summary>
@@ -87,20 +86,6 @@ public sealed class SparkDeskPromptExecutionSettings : PromptExecutionSettings
     }
 
     /// <summary>
-    /// Gets or sets the version of the SparkDesk AI model to use.
-    /// </summary>
-    [JsonPropertyName("version")]
-    public SparkDeskTextVersion Version
-    {
-        get => this._version;
-        set
-        {
-            this.ThrowIfFrozen();
-            this._version = value;
-        }
-    }
-
-    /// <summary>
     /// Gets or sets the behavior for how tool calls are handled.
     /// </summary>
     /// <remarks>
@@ -158,7 +143,6 @@ public sealed class SparkDeskPromptExecutionSettings : PromptExecutionSettings
             Temperature = this.Temperature,
             TopK = this.TopK,
             MaxTokens = this.MaxTokens,
-            Version = this.Version,
             ToolCallBehavior = this.ToolCallBehavior?.Clone(),
         };
     }

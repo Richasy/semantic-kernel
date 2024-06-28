@@ -20,7 +20,7 @@ public static class SparkDeskKernelBuilderExtensions
     /// <param name="apiKey">The API key for authentication Spark API.</param>
     /// <param name="secret">Secret.</param>
     /// <param name="appId">App id.</param>
-    /// <param name="apiVersion">The version of the Spark API.</param>
+    /// <param name="modelId">The version of the Spark API.</param>
     /// <param name="serviceId">The optional service ID.</param>
     /// <returns>The updated kernel builder.</returns>
     public static IKernelBuilder AddSparkDeskChatCompletion(
@@ -28,7 +28,7 @@ public static class SparkDeskKernelBuilderExtensions
         string apiKey,
         string secret,
         string appId,
-        SparkDeskTextVersion apiVersion = SparkDeskTextVersion.V3_5,
+        string modelId,
         string? serviceId = null)
     {
         Verify.NotNull(builder);
@@ -41,7 +41,7 @@ public static class SparkDeskKernelBuilderExtensions
                 apiKey: apiKey,
                 secret: secret,
                 appId: appId,
-                apiVersion: apiVersion,
+                modelId: modelId,
                 loggerFactory: serviceProvider.GetService<ILoggerFactory>()));
         return builder;
     }

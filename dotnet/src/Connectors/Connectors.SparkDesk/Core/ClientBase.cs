@@ -11,7 +11,7 @@ namespace Microsoft.SemanticKernel.Connectors.SparkDesk.Core;
 
 internal abstract class ClientBase
 {
-    private const string BaseUrl = "wss://spark-api.xf-yun.com";
+    internal const string BaseUrl = "wss://spark-api.xf-yun.com";
     private readonly ILogger _logger;
 
     protected ClientBase(ILogger? logger)
@@ -43,9 +43,9 @@ internal abstract class ClientBase
         }
     }
 
-    protected static string GetAuthorizationUrl(string apiKey, string secret, string hostUrl, string type = "GET")
+    protected static string GetAuthorizationUrl(string apiKey, string secret, string authUrl, string type = "GET")
     {
-        var url = new Uri(hostUrl);
+        var url = new Uri(authUrl);
         var dateString = DateTime.UtcNow.ToString("r");
         var signatureBytes = Encoding.ASCII.GetBytes($"host: {url.Host}\ndate: {dateString}\n{type} {url.AbsolutePath} HTTP/1.1");
 
@@ -70,14 +70,4 @@ internal abstract class ClientBase
 #pragma warning restore CA2254
         }
     }
-
-    protected static string GetHostApi(SparkDeskTextVersion version)
-        => version switch
-        {
-            SparkDeskTextVersion.V1_5 => $"{BaseUrl}/v1.1",
-            SparkDeskTextVersion.V2 => $"{BaseUrl}/v2.1",
-            SparkDeskTextVersion.V3 => $"{BaseUrl}/v3.1",
-            SparkDeskTextVersion.V3_5 => $"{BaseUrl}/v3.5",
-            _ => throw new ArgumentOutOfRangeException(nameof(version), version, "Unknown version"),
-        };
 }

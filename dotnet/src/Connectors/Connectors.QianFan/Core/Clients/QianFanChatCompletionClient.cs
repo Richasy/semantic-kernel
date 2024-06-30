@@ -266,7 +266,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
                 throw new KernelException("Prompt was blocked due to QianFan API safety reasons.");
             }
 
-            if (qianFanResponse.FinishReason != QianFanFinishReason.Normal)
+            if (qianFanResponse.FinishReason != QianFanFinishReason.Normal && ((qianFanResponse.IsEnd && string.IsNullOrEmpty(qianFanResponse.Result)) || (qianFanResponse.Object == null)))
             {
                 throw new KernelException("QianFan API doesn't return any data.");
             }

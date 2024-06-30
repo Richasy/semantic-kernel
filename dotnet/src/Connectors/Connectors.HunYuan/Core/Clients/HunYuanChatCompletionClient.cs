@@ -240,7 +240,15 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
     {
         await foreach (var json in this._streamJsonParser.ParseAsync(responseStream, cancellationToken: ct).ConfigureAwait(false))
         {
-            yield return DeserializeResponse<HunYuanChatResponse>(json);
+            if (json.StartsWith("{\"Note\"", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var content = DeserializeResponse<HunYuanChatResponse.HunYuanMessageResponse>(json);
+                yield return new HunYuanChatResponse { Response = content };
+            }
+            else
+            {
+                yield return DeserializeResponse<HunYuanChatResponse>(json);
+            }
         }
     }
 
@@ -264,7 +272,7 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
                 throw new KernelException("Prompt was blocked due to HunYuan API safety reasons.");
             }
 
-            if (string.IsNullOrEmpty(firstChoice.Message?.Content) && string.IsNullOrEmpty(firstChoice.Delta?.Content))
+            if (firstChoice.FinishReason is not null && firstChoice.FinishReason != HunYuanFinishReason.Stop && string.IsNullOrEmpty(firstChoice.Message?.Content) && string.IsNullOrEmpty(firstChoice.Delta?.Content))
             {
                 throw new KernelException("HunYuan API doesn't return any data.");
             }

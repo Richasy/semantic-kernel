@@ -34,7 +34,6 @@ public readonly struct HunYuanFinishReason : IEquatable<HunYuanFinishReason>
     [JsonConstructor]
     public HunYuanFinishReason(string label)
     {
-        Verify.NotNullOrWhiteSpace(label, nameof(label));
         this.Label = label;
     }
 

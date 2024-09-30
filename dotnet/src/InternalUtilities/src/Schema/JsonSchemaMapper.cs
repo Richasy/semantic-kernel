@@ -1,5 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+// Source copied from https://github.com/eiriktsarpalis/stj-schema-mapper
+// It should be kept in sync with any changes made in that repo,
+// and should be removed once the relevant replacements are available in STJv9.
+
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -42,7 +46,7 @@ internal
     {
         if (options is null)
         {
-           ThrowHelpers.ThrowArgumentNullException(nameof(options));
+            ThrowHelpers.ThrowArgumentNullException(nameof(options));
         }
 
         if (type is null)

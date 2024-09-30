@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -59,11 +60,11 @@ internal abstract class ClientBase
         return response;
     }
 
-    protected static T DeserializeResponse<T>(string body)
+    protected static T DeserializeResponse<T>(string body, JsonTypeInfo<T> typeInfo)
     {
         try
         {
-            return JsonSerializer.Deserialize<T>(body) ?? throw new JsonException("Response is null");
+            return JsonSerializer.Deserialize<T>(body, typeInfo) ?? throw new JsonException("Response is null");
         }
         catch (JsonException exc)
         {
@@ -81,7 +82,8 @@ internal abstract class ClientBase
         string secretId,
         string action = "ChatCompletions",
         string version = "2023-09-01",
-        string? region = default)
+        string? region = default,
+        JsonTypeInfo? typeInfo = default)
     {
         var now = DateTimeOffset.Now.ToUnixTimeSeconds();
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, endpoint);
@@ -89,12 +91,12 @@ internal abstract class ClientBase
         httpRequestMessage.Headers.Add(HttpHeaderConstant.Names.SemanticKernelVersion,
             HttpHeaderConstant.Values.GetAssemblyVersion(typeof(ClientBase)));
 
-        var headers = this.BuildHeaders(endpoint, requestData, secretKey, secretId, action, version, region);
+        var headers = this.BuildHeaders(endpoint, requestData, secretKey, secretId, action, version, region, typeInfo);
         foreach (var kvp in headers)
         {
             if (kvp.Key.Equals("Content-Type", StringComparison.Ordinal))
             {
-                ByteArrayContent content = new(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(requestData)));
+                ByteArrayContent content = new(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(requestData, typeInfo!)));
                 content.Headers.Remove("Content-Type");
                 content.Headers.Add("Content-Type", kvp.Value);
                 httpRequestMessage.Content = content;
@@ -134,9 +136,10 @@ internal abstract class ClientBase
         string secretId,
         string action,
         string version,
-        string? region)
+        string? region,
+        JsonTypeInfo? typeInfo)
     {
-        var payload = JsonSerializer.Serialize(request);
+        var payload = JsonSerializer.Serialize(request, typeInfo!);
         string httpRequestMethod = "POST";
         string canonicalURI = "/";
         string canonicalHeaders = "content-type:" + "application/json" + "\nhost:" + endpoint.Host + $"\nx-tc-action:{action.ToLower()}\n";

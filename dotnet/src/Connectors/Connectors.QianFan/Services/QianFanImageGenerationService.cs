@@ -58,4 +58,10 @@ public sealed class QianFanImageGenerationService : ITextToImageService
     {
         return this._imageGenerationClient.GenerateImageAsync(description, settings, kernel, cancellationToken);
     }
+
+    /// <inheritdoc/>
+    public Task<string> GenerateImageAsync(string description, int width, int height, Kernel? kernel = null, CancellationToken cancellationToken = default)
+    {
+        return this._imageGenerationClient.GenerateImageAsync(description, new QianFanDrawExecutionSettings { Width = width, Height = height }, kernel, cancellationToken);
+    }
 }

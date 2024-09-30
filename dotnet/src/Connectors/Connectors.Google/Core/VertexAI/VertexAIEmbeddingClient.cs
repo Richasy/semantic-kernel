@@ -64,7 +64,7 @@ internal sealed class VertexAIEmbeddingClient : ClientBase
         Verify.NotNullOrEmpty(data);
 
         var geminiRequest = GetEmbeddingRequest(data);
-        using var httpRequestMessage = await this.CreateHttpRequestAsync(geminiRequest, this._embeddingEndpoint).ConfigureAwait(false);
+        using var httpRequestMessage = await this.CreateHttpRequestAsync(geminiRequest, this._embeddingEndpoint, JsonGenContext.Default.GeminiRequest).ConfigureAwait(false);
 
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
@@ -76,7 +76,7 @@ internal sealed class VertexAIEmbeddingClient : ClientBase
         => VertexAIEmbeddingRequest.FromData(data);
 
     private static List<ReadOnlyMemory<float>> DeserializeAndProcessEmbeddingsResponse(string body)
-        => ProcessEmbeddingsResponse(DeserializeResponse<VertexAIEmbeddingResponse>(body));
+        => ProcessEmbeddingsResponse(DeserializeResponse<VertexAIEmbeddingResponse>(body, JsonGenContext.Default.VertexAIEmbeddingResponse));
 
     private static List<ReadOnlyMemory<float>> ProcessEmbeddingsResponse(VertexAIEmbeddingResponse embeddingsResponse)
         => embeddingsResponse.Predictions.Select(prediction => prediction.Embeddings.Values).ToList();

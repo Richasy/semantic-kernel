@@ -92,7 +92,7 @@ internal sealed class GeminiTokenCounterClient : ClientBase
         Verify.NotNullOrWhiteSpace(prompt);
 
         var geminiRequest = CreateGeminiRequest(prompt, executionSettings);
-        using var httpRequestMessage = await this.CreateHttpRequestAsync(geminiRequest, this._tokenCountingEndpoint).ConfigureAwait(false);
+        using var httpRequestMessage = await this.CreateHttpRequestAsync(geminiRequest, this._tokenCountingEndpoint, JsonGenContext.Default.GeminiRequest).ConfigureAwait(false);
 
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
@@ -102,7 +102,7 @@ internal sealed class GeminiTokenCounterClient : ClientBase
 
     private static int DeserializeAndProcessCountTokensResponse(string body)
     {
-        var node = DeserializeResponse<JsonNode>(body);
+        var node = JsonNode.Parse(body);
         return node["totalTokens"]?.GetValue<int>() ?? throw new KernelException("Invalid response from model");
     }
 

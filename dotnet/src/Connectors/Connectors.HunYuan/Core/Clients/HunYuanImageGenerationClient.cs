@@ -55,9 +55,9 @@ internal sealed class HunYuanImageGenerationClient : ClientBase
         CancellationToken cancellationToken = default)
     {
         var request = this.CreateDrawRequest(prompt, settings);
-        using var httpReq = this.CreateHttpRequest(request, this._imageGenerationEndpoint, this._secretKey, this._secretId, "SubmitHunyuanImageJob", region: "ap-guangzhou");
+        using var httpReq = this.CreateHttpRequest(request, this._imageGenerationEndpoint, this._secretKey, this._secretId, "SubmitHunyuanImageJob", region: "ap-guangzhou", typeInfo: JsonGenContext.Default.HunYuanDrawCreateRequest);
         var body = await this.SendRequestAndGetStringBodyAsync(httpReq, cancellationToken).ConfigureAwait(false);
-        var createResponse = JsonSerializer.Deserialize<HunYuanDrawCreateResponse>(body);
+        var createResponse = JsonSerializer.Deserialize<HunYuanDrawCreateResponse>(body, JsonGenContext.Default.HunYuanDrawCreateResponse);
         if (createResponse is null || string.IsNullOrEmpty(createResponse?.Response?.JobId))
         {
             throw new KernelException("Failed to create hunyuan draw job.");
@@ -95,9 +95,9 @@ internal sealed class HunYuanImageGenerationClient : ClientBase
         {
             JobId = jobId,
         };
-        using var httpReq = this.CreateHttpRequest(request, this._imageGenerationEndpoint, this._secretKey, this._secretId, "QueryHunyuanImageJob", region: "ap-guangzhou");
+        using var httpReq = this.CreateHttpRequest(request, this._imageGenerationEndpoint, this._secretKey, this._secretId, "QueryHunyuanImageJob", region: "ap-guangzhou", typeInfo: JsonGenContext.Default.HunYuanDrawQueryRequest);
         var body = await this.SendRequestAndGetStringBodyAsync(httpReq, cancellationToken).ConfigureAwait(false);
-        var response = JsonSerializer.Deserialize<HunYuanDrawQueryResponse>(body);
+        var response = JsonSerializer.Deserialize<HunYuanDrawQueryResponse>(body, JsonGenContext.Default.HunYuanDrawQueryResponse);
 
         // Task failed.
         if (response is null || response.Response!.JobStatusCode == "4")

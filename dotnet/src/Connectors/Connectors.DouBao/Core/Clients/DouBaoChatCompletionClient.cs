@@ -124,7 +124,7 @@ internal sealed class DouBaoChatCompletionClient : ClientBase
         var state = this.ValidateInputAndCreateChatCompletionState(chatHistory, kernel, executionSettings);
 
         state.DouBaoRequest.Stream = true;
-        using var httpRequestMessage = this.CreateHttpRequest(state.DouBaoRequest, this._chatGenerationEndpoint);
+        using var httpRequestMessage = this.CreateHttpRequest(state.DouBaoRequest, this._chatGenerationEndpoint, JsonGenContext.Default.DouBaoChatRequest);
         using var response = await this.SendRequestAndGetResponseImmediatelyAfterHeadersReadAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
         using var responseStream = await response.Content.ReadAsStreamAndTranslateExceptionAsync()
@@ -191,10 +191,10 @@ internal sealed class DouBaoChatCompletionClient : ClientBase
         DouBaoChatRequest request,
         CancellationToken cancellationToken)
     {
-        using var httpRequestMessage = this.CreateHttpRequest(request, endpoint);
+        using var httpRequestMessage = this.CreateHttpRequest(request, endpoint, JsonGenContext.Default.DouBaoChatRequest);
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
-        var response = DeserializeResponse<DouBaoChatResponse>(body);
+        var response = DeserializeResponse(body, JsonGenContext.Default.DouBaoChatResponse);
         ValidateDouBaoResponse(response);
         return response;
     }
@@ -237,7 +237,7 @@ internal sealed class DouBaoChatCompletionClient : ClientBase
     {
         await foreach (var json in this._streamJsonParser.ParseAsync(responseStream, cancellationToken: ct).ConfigureAwait(false))
         {
-            yield return DeserializeResponse<DouBaoChatResponse>(json);
+            yield return DeserializeResponse(json, JsonGenContext.Default.DouBaoChatResponse);
         }
     }
 

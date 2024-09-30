@@ -58,7 +58,7 @@ internal sealed class GoogleAIEmbeddingClient : ClientBase
         Verify.NotNullOrEmpty(data);
 
         var geminiRequest = this.GetEmbeddingRequest(data);
-        using var httpRequestMessage = await this.CreateHttpRequestAsync(geminiRequest, this._embeddingEndpoint).ConfigureAwait(false);
+        using var httpRequestMessage = await this.CreateHttpRequestAsync(geminiRequest, this._embeddingEndpoint, JsonGenContext.Default.GeminiRequest).ConfigureAwait(false);
 
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
@@ -70,7 +70,7 @@ internal sealed class GoogleAIEmbeddingClient : ClientBase
         => GoogleAIEmbeddingRequest.FromData(data, this._embeddingModelId);
 
     private static List<ReadOnlyMemory<float>> DeserializeAndProcessEmbeddingsResponse(string body)
-        => ProcessEmbeddingsResponse(DeserializeResponse<GoogleAIEmbeddingResponse>(body));
+        => ProcessEmbeddingsResponse(DeserializeResponse<GoogleAIEmbeddingResponse>(body, JsonGenContext.Default.GoogleAIEmbeddingResponse));
 
     private static List<ReadOnlyMemory<float>> ProcessEmbeddingsResponse(GoogleAIEmbeddingResponse embeddingsResponse)
         => embeddingsResponse.Embeddings.Select(embedding => embedding.Values).ToList();

@@ -47,4 +47,9 @@ internal class SparkDeskImageGenerationService : ITextToImageService
     {
         return this._imageGenerationClient.GenerateImageAsync(description, settings, cancellationToken);
     }
+
+    public Task<string> GenerateImageAsync(string description, int width, int height, Kernel? kernel = null, CancellationToken cancellationToken = default)
+    {
+        return this._imageGenerationClient.GenerateImageAsync(description, new SparkDeskDrawExecutionSettings { Width = width, Height = height }, cancellationToken);
+    }
 }

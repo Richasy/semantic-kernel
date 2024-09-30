@@ -3,6 +3,7 @@
 using System;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -59,11 +60,11 @@ internal abstract class ClientBase
         return response;
     }
 
-    protected static T DeserializeResponse<T>(string body)
+    protected static T DeserializeResponse<T>(string body, JsonTypeInfo<T> typeInfo)
     {
         try
         {
-            return JsonSerializer.Deserialize<T>(body) ?? throw new JsonException("Response is null");
+            return JsonSerializer.Deserialize<T>(body, typeInfo) ?? throw new JsonException("Response is null");
         }
         catch (JsonException exc)
         {
@@ -74,9 +75,9 @@ internal abstract class ClientBase
         }
     }
 
-    protected HttpRequestMessage CreateHttpRequest(object requestData, Uri endpoint)
+    protected HttpRequestMessage CreateHttpRequest(object requestData, Uri endpoint, JsonTypeInfo typeInfo)
     {
-        var httpRequestMessage = HttpRequest.CreatePostRequest(endpoint, requestData);
+        var httpRequestMessage = HttpRequest.CreatePostRequest(endpoint, requestData, typeInfo);
         httpRequestMessage.Headers.Add("User-Agent", HttpHeaderConstant.Values.UserAgent);
         httpRequestMessage.Headers.Add("anthropic-version", "2023-06-01");
         httpRequestMessage.Headers.Add("anthropic-beta", "messages-2023-12-15");

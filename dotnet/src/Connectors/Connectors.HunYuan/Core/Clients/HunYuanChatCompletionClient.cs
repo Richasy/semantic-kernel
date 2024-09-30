@@ -127,7 +127,7 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
     {
         var state = this.ValidateInputAndCreateChatCompletionState(chatHistory, kernel, executionSettings);
         state.HunYuanRequest.Stream = true;
-        using var httpRequestMessage = this.CreateHttpRequest(state.HunYuanRequest, this._chatGenerationEndpoint, this._secretKey, this._secretId);
+        using var httpRequestMessage = this.CreateHttpRequest(state.HunYuanRequest, this._chatGenerationEndpoint, this._secretKey, this._secretId, typeInfo: JsonGenContext.Default.HunYuanChatRequest);
         using var response = await this.SendRequestAndGetResponseImmediatelyAfterHeadersReadAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
         using var responseStream = await response.Content.ReadAsStreamAndTranslateExceptionAsync()
@@ -194,10 +194,10 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
         HunYuanChatRequest request,
         CancellationToken cancellationToken)
     {
-        using var httpRequestMessage = this.CreateHttpRequest(request, endpoint, this._secretKey, this._secretId);
+        using var httpRequestMessage = this.CreateHttpRequest(request, endpoint, this._secretKey, this._secretId, typeInfo: JsonGenContext.Default.HunYuanChatRequest);
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
-        var response = DeserializeResponse<HunYuanChatResponse>(body);
+        var response = DeserializeResponse<HunYuanChatResponse>(body, JsonGenContext.Default.HunYuanChatResponse);
         ValidateHunYuanResponse(response.Response!);
         return response;
     }
@@ -242,12 +242,12 @@ internal sealed class HunYuanChatCompletionClient : ClientBase
         {
             if (json.StartsWith("{\"Note\"", StringComparison.InvariantCultureIgnoreCase))
             {
-                var content = DeserializeResponse<HunYuanChatResponse.HunYuanMessageResponse>(json);
+                var content = DeserializeResponse<HunYuanChatResponse.HunYuanMessageResponse>(json, JsonGenContext.Default.HunYuanMessageResponse);
                 yield return new HunYuanChatResponse { Response = content };
             }
             else
             {
-                yield return DeserializeResponse<HunYuanChatResponse>(json);
+                yield return DeserializeResponse<HunYuanChatResponse>(json, JsonGenContext.Default.HunYuanChatResponse);
             }
         }
     }

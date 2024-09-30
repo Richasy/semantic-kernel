@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Runtime;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -57,5 +58,11 @@ public sealed class HunYuanImageGenerationService : ITextToImageService
     public Task<string> GenerateImageAsync(string description, DrawExecutionSettings settings, Kernel? kernel = null, CancellationToken cancellationToken = default)
     {
         return this._imageGenerationClient.GenerateImageAsync(description, settings, kernel, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public Task<string> GenerateImageAsync(string description, int width, int height, Kernel? kernel = null, CancellationToken cancellationToken = default)
+    {
+        return this._imageGenerationClient.GenerateImageAsync(description, new HunYuanDrawExecutionSettings { Width = width, Height = height }, kernel, cancellationToken);
     }
 }

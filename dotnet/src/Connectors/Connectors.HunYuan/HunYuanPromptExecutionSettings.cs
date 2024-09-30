@@ -99,6 +99,6 @@ public class HunYuanPromptExecutionSettings : PromptExecutionSettings
         }
 
         var json = JsonSerializer.Serialize(executionSettings);
-        return JsonSerializer.Deserialize<HunYuanPromptExecutionSettings>(json, JsonOptionsCache.ReadPermissive)!;
+        return JsonSerializer.Deserialize<HunYuanPromptExecutionSettings>(json, JsonGenContext.Default.HunYuanPromptExecutionSettings)!;
     }
 }

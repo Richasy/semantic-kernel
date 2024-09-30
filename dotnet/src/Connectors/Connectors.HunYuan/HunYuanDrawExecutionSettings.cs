@@ -71,7 +71,7 @@ public sealed class HunYuanDrawExecutionSettings : DrawExecutionSettings
         }
 
         var json = JsonSerializer.Serialize(executionSettings);
-        var openAIDrawExecutionSettings = JsonSerializer.Deserialize<HunYuanDrawExecutionSettings>(json, JsonOptionsCache.ReadPermissive);
+        var openAIDrawExecutionSettings = JsonSerializer.Deserialize<HunYuanDrawExecutionSettings>(json, JsonGenContext.Default.HunYuanDrawExecutionSettings);
         if (openAIDrawExecutionSettings is not null)
         {
             return openAIDrawExecutionSettings;

@@ -91,7 +91,7 @@ internal sealed class AnthropicChatCompletionClient : ClientBase
     {
         var state = ValidateInputAndCreateChatCompletionState(chatHistory, kernel, executionSettings);
         state.AnthropicRequest.Stream = true;
-        using var httpRequestMessage = this.CreateHttpRequest(state.AnthropicRequest, this._chatGenerationEndpoint);
+        using var httpRequestMessage = this.CreateHttpRequest(state.AnthropicRequest, this._chatGenerationEndpoint, JsonGenContext.Default.AnthropicRequest);
         using var response = await this.SendRequestAndGetResponseImmediatelyAfterHeadersReadAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
         using var responseStream = await response.Content.ReadAsStreamAndTranslateExceptionAsync()
@@ -159,10 +159,10 @@ internal sealed class AnthropicChatCompletionClient : ClientBase
         AnthropicRequest anthropicRequest,
         CancellationToken cancellationToken)
     {
-        using var httpRequestMessage = this.CreateHttpRequest(anthropicRequest, endpoint);
+        using var httpRequestMessage = this.CreateHttpRequest(anthropicRequest, endpoint, JsonGenContext.Default.AnthropicRequest);
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
-        var anthropicResponse = DeserializeResponse<AnthropicResponse>(body);
+        var anthropicResponse = DeserializeResponse(body, JsonGenContext.Default.AnthropicResponse);
         ValidateAnthropicResponse(anthropicResponse);
         return anthropicResponse;
     }
@@ -207,7 +207,7 @@ internal sealed class AnthropicChatCompletionClient : ClientBase
     {
         await foreach (var json in this._streamJsonParser.ParseAsync(responseStream, cancellationToken: ct).ConfigureAwait(false))
         {
-            yield return DeserializeResponse<AnthropicStreamResponse>(json);
+            yield return DeserializeResponse(json, JsonGenContext.Default.AnthropicStreamResponse);
         }
     }
 

@@ -3,6 +3,7 @@
 using System;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -65,11 +66,11 @@ internal abstract class ClientBase
         return response;
     }
 
-    protected static T DeserializeResponse<T>(string body)
+    protected static T DeserializeResponse<T>(string body, JsonTypeInfo<T> typeInfo)
     {
         try
         {
-            return JsonSerializer.Deserialize<T>(body) ?? throw new JsonException("Response is null");
+            return JsonSerializer.Deserialize<T>(body, typeInfo) ?? throw new JsonException("Response is null");
         }
         catch (JsonException exc)
         {
@@ -80,11 +81,11 @@ internal abstract class ClientBase
         }
     }
 
-    protected HttpRequestMessage CreateHttpRequest(object requestData, Uri endpoint)
+    protected HttpRequestMessage CreateHttpRequest(object requestData, JsonTypeInfo typeInfo, Uri endpoint)
     {
         var token = this._token?.Token?.AccessToken ?? throw new InvalidOperationException("Token is not initialized.");
         endpoint = new Uri(endpoint.AbsoluteUri.TrimEnd('/') + $"?access_token={token}");
-        var httpRequestMessage = HttpRequest.CreatePostRequest(endpoint, requestData);
+        var httpRequestMessage = HttpRequest.CreatePostRequest(endpoint, requestData, typeInfo);
         httpRequestMessage.Headers.Add("User-Agent", HttpHeaderConstant.Values.UserAgent);
         httpRequestMessage.Headers.Add(HttpHeaderConstant.Names.SemanticKernelVersion,
             HttpHeaderConstant.Values.GetAssemblyVersion(typeof(ClientBase)));
@@ -119,7 +120,7 @@ internal abstract class ClientBase
         if (resp.IsSuccessStatusCode)
         {
             var stringContent = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var token = JsonSerializer.Deserialize<QianFanAuthToken>(stringContent);
+            var token = JsonSerializer.Deserialize<QianFanAuthToken>(stringContent, JsonGenContext.Default.QianFanAuthToken);
             return token ?? throw new KernelException($"Unable to deserialize '{await resp.Content.ReadAsStringAsync().ConfigureAwait(false)}' into {nameof(QianFanAuthToken)}.");
         }
 

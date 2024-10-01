@@ -139,8 +139,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
                 state.TextRequest.Payload!.Functions = null;
             }
 
-            var json = JsonSerializer.Serialize(state.TextRequest);
-            ArraySegment<byte> messageBuffer = new(JsonSerializer.SerializeToUtf8Bytes(state.TextRequest));
+            ArraySegment<byte> messageBuffer = new(JsonSerializer.SerializeToUtf8Bytes(state.TextRequest, JsonGenContext.Default.SparkTextRequest));
             await socket.SendAsync(messageBuffer, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
 
             await foreach (var messageContent in this.GetStreamingChatMessageContentsOrPopulateStateForToolCallingAsync(state, socket, cancellationToken).ConfigureAwait(false))
@@ -203,7 +202,7 @@ internal sealed class SparkChatCompletionClient : ClientBase
             if (result.MessageType == WebSocketMessageType.Text)
             {
                 var stream = new MemoryStream(buffer, 0, result.Count);
-                var response = JsonSerializer.Deserialize<SparkTextResponse>(stream);
+                var response = JsonSerializer.Deserialize<SparkTextResponse>(stream, JsonGenContext.Default.SparkTextResponse);
                 if (response?.Header?.Code != 0)
                 {
                     throw new KernelException($"Spark exception: {response?.Header?.Message}");

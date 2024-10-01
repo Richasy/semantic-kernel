@@ -126,7 +126,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
 
         state.QianFanRequest.Stream = true;
         await this.EnsureAuthTokenAsync().ConfigureAwait(false);
-        using var httpRequestMessage = this.CreateHttpRequest(state.QianFanRequest, this._chatGenerationEndpoint);
+        using var httpRequestMessage = this.CreateHttpRequest(state.QianFanRequest, JsonGenContext.Default.QianFanChatRequest, this._chatGenerationEndpoint);
         using var response = await this.SendRequestAndGetResponseImmediatelyAfterHeadersReadAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
         using var responseStream = await response.Content.ReadAsStreamAndTranslateExceptionAsync()
@@ -195,10 +195,10 @@ internal sealed class QianFanChatCompletionClient : ClientBase
         CancellationToken cancellationToken)
     {
         await this.EnsureAuthTokenAsync().ConfigureAwait(false);
-        using var httpRequestMessage = this.CreateHttpRequest(qianFanRequest, endpoint);
+        using var httpRequestMessage = this.CreateHttpRequest(qianFanRequest, JsonGenContext.Default.QianFanChatRequest, endpoint);
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
-        var qianFanResponse = DeserializeResponse<QianFanChatResponse>(body);
+        var qianFanResponse = DeserializeResponse<QianFanChatResponse>(body, JsonGenContext.Default.QianFanChatResponse);
         ValidateQianFanResponse(qianFanResponse);
         return qianFanResponse;
     }
@@ -243,7 +243,7 @@ internal sealed class QianFanChatCompletionClient : ClientBase
     {
         await foreach (var json in this._streamJsonParser.ParseAsync(responseStream, cancellationToken: ct).ConfigureAwait(false))
         {
-            yield return DeserializeResponse<QianFanChatResponse>(json);
+            yield return DeserializeResponse<QianFanChatResponse>(json, JsonGenContext.Default.QianFanChatResponse);
         }
     }
 

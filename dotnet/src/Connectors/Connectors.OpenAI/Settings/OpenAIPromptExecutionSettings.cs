@@ -102,7 +102,7 @@ public class OpenAIPromptExecutionSettings : PromptExecutionSettings
         set
         {
             this.ThrowIfFrozen();
-            this._maxTokens = value == null || value <= 1 ? default : value;
+            this._maxTokens = value;
         }
     }
 

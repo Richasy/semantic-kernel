@@ -60,9 +60,9 @@ internal sealed class QianFanImageGenerationClient : ClientBase
     {
         await this.EnsureAuthTokenAsync().ConfigureAwait(false);
         var request = this.GetRequest(prompt, executionSettings);
-        using var httpReq = this.CreateHttpRequest(request, this._imageGenerationEndpoint);
+        using var httpReq = this.CreateHttpRequest(request, JsonGenContext.Default.QianFanImageRequest, this._imageGenerationEndpoint);
         var body = await this.SendRequestAndGetStringBodyAsync(httpReq, cancellationToken).ConfigureAwait(false);
-        var response = JsonSerializer.Deserialize<QianFanImageResponse>(body);
+        var response = JsonSerializer.Deserialize<QianFanImageResponse>(body, JsonGenContext.Default.QianFanImageResponse);
         if (response == null || response.Data == null || response.Data.Count == 0)
         {
             throw new KernelException("Failed to generate image: empty response");

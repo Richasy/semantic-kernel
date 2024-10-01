@@ -4,6 +4,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -28,11 +29,11 @@ internal abstract class ClientBase
         }
     }
 
-    protected static T DeserializeResponse<T>(string body)
+    protected static T DeserializeResponse<T>(string body, JsonTypeInfo<T> typeInfo)
     {
         try
         {
-            return JsonSerializer.Deserialize<T>(body) ?? throw new JsonException("Response is null");
+            return JsonSerializer.Deserialize<T>(body, typeInfo) ?? throw new JsonException("Response is null");
         }
         catch (JsonException exc)
         {

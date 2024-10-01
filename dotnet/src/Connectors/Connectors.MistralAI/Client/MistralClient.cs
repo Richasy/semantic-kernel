@@ -11,6 +11,7 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -66,7 +67,7 @@ internal sealed class MistralClient
                 try
                 {
                     using var httpRequestMessage = this.CreatePost(chatRequest, endpoint, this._apiKey, stream: false);
-                    responseData = await this.SendRequestAsync<ChatCompletionResponse>(httpRequestMessage, cancellationToken).ConfigureAwait(false);
+                    responseData = await this.SendRequestAsync<ChatCompletionResponse>(httpRequestMessage, JsonGenContext.Default.ChatCompletionResponse, cancellationToken).ConfigureAwait(false);
                     this.LogUsage(responseData?.Usage);
                     if (responseData is null || responseData.Choices is null || responseData.Choices.Count == 0)
                     {
@@ -551,7 +552,7 @@ internal sealed class MistralClient
     {
         await foreach (var json in this._streamJsonParser.ParseAsync(responseStream, cancellationToken: cancellationToken).ConfigureAwait(false))
         {
-            yield return DeserializeResponse<MistralChatCompletionChunk>(json);
+            yield return DeserializeResponse<MistralChatCompletionChunk>(json, JsonGenContext.Default.MistralChatCompletionChunk);
         }
     }
 
@@ -562,7 +563,7 @@ internal sealed class MistralClient
         var endpoint = this.GetEndpoint(mistralExecutionSettings, path: "embeddings");
         using var httpRequestMessage = this.CreatePost(request, endpoint, this._apiKey, false);
 
-        var response = await this.SendRequestAsync<TextEmbeddingResponse>(httpRequestMessage, cancellationToken).ConfigureAwait(false);
+        var response = await this.SendRequestAsync<TextEmbeddingResponse>(httpRequestMessage, JsonGenContext.Default.TextEmbeddingResponse, cancellationToken).ConfigureAwait(false);
 
         return response.Data!.Select(item => new ReadOnlyMemory<float>([.. item.Embedding])).ToList();
     }
@@ -781,13 +782,13 @@ internal sealed class MistralClient
         request.Content!.Headers.ContentType = new MediaTypeHeaderValue("application/json");
     }
 
-    private async Task<T> SendRequestAsync<T>(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken)
+    private async Task<T> SendRequestAsync<T>(HttpRequestMessage httpRequestMessage, JsonTypeInfo<T> typeInfo, CancellationToken cancellationToken)
     {
         using var response = await this._httpClient.SendWithSuccessCheckAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
 
         var body = await response.Content.ReadAsStringWithExceptionMappingAsync().ConfigureAwait(false);
 
-        return DeserializeResponse<T>(body);
+        return DeserializeResponse<T>(body, typeInfo);
     }
 
     private async Task<HttpResponseMessage> SendStreamingRequestAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken)
@@ -817,11 +818,11 @@ internal sealed class MistralClient
         return false;
     }
 
-    private static T DeserializeResponse<T>(string body)
+    private static T DeserializeResponse<T>(string body, JsonTypeInfo<T> typeInfo)
     {
         try
         {
-            T? deserializedResponse = JsonSerializer.Deserialize<T>(body);
+            T? deserializedResponse = JsonSerializer.Deserialize<T>(body, typeInfo);
             return deserializedResponse ?? throw new JsonException("Response is null");
         }
         catch (JsonException exc)
@@ -883,7 +884,7 @@ internal sealed class MistralClient
         {
             try
             {
-                arguments = JsonSerializer.Deserialize<KernelArguments>(toolCall.Function.Arguments);
+                arguments = JsonSerializer.Deserialize<KernelArguments>(toolCall.Function.Arguments, JsonGenContext.Default.KernelArguments);
                 if (arguments is not null)
                 {
                     // Iterate over copy of the names to avoid mutating the dictionary while enumerating it

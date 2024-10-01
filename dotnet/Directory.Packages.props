@@ -13,8 +13,10 @@
     <PackageVersion Include="Handlebars.Net.Helpers" Version="2.4.5" />
     <PackageVersion Include="Markdig" Version="0.37.0" />
     <PackageVersion Include="Handlebars.Net" Version="2.1.6" />
+    <PackageVersion Include="System.ClientModel" Version="1.1.0-beta.7" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageVersion Include="JsonSchema.Net" Version="5.4.2" />
+    <PackageVersion Include="OpenAI" Version="2.0.0-beta.11" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="1.20.1" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.1.0" />
     <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="12.2.5" />

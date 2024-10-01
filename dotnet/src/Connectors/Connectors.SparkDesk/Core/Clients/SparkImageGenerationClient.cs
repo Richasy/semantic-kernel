@@ -43,13 +43,13 @@ internal sealed class SparkImageGenerationClient : ClientBase
         var url = GetAuthorizationUrl(this._apiKey!, this._secret!, $"https://spark-api.cn-huabei-1.xf-yun.com/{this._version}/tti", "POST");
         using var httpReq = new HttpRequestMessage(HttpMethod.Post, url)
         {
-            Content = new StringContent(JsonSerializer.Serialize(request), System.Text.Encoding.UTF8, "application/json"),
+            Content = new StringContent(JsonSerializer.Serialize(request, JsonGenContext.Default.SparkImageRequest), System.Text.Encoding.UTF8, "application/json"),
         };
         using var httpClient = new HttpClient();
         var response = await httpClient.SendAsync(httpReq, cancellationToken).ConfigureAwait(false);
         var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
-        var sparkResponse = JsonSerializer.Deserialize<SparkTextResponse>(responseContent);
+        var sparkResponse = JsonSerializer.Deserialize<SparkTextResponse>(responseContent, JsonGenContext.Default.SparkTextResponse);
         if (sparkResponse?.Header?.Code != 0)
         {
             throw new KernelException($"Failed to generate image: {sparkResponse?.Header?.Message}");

@@ -27,16 +27,19 @@ public class OpenAITextToImageService : ITextToImageService
     /// <param name="apiKey">OpenAI API key, see https://platform.openai.com/account/api-keys</param>
     /// <param name="organization">OpenAI organization id. This is usually optional unless your account belongs to multiple organizations.</param>
     /// <param name="modelId">The model to use for image generation.</param>
+    /// <param name="proxyUrl">Proxy url</param>
     /// <param name="httpClient">Custom <see cref="HttpClient"/> for HTTP requests.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for logging. If null, no logging will be performed.</param>
     public OpenAITextToImageService(
         string apiKey,
         string? organization = null,
         string? modelId = null,
+        string? proxyUrl = null,
         HttpClient? httpClient = null,
         ILoggerFactory? loggerFactory = null)
     {
-        this._client = new(modelId, apiKey, organization, null, httpClient, loggerFactory?.CreateLogger(this.GetType()));
+        var endpoint = string.IsNullOrEmpty(proxyUrl) ? null : new System.Uri(proxyUrl);
+        this._client = new(modelId, apiKey, organization, endpoint, httpClient, loggerFactory?.CreateLogger(this.GetType()));
     }
 
     /// <inheritdoc/>

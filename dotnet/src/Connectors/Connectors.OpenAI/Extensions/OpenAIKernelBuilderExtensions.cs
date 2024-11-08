@@ -110,6 +110,7 @@ public static class OpenAIKernelBuilderExtensions
         string apiKey,
         string? orgId = null,
         string? modelId = null,
+        string? baseUrl = null,
         string? serviceId = null,
         HttpClient? httpClient = null)
     {
@@ -121,6 +122,7 @@ public static class OpenAIKernelBuilderExtensions
                 apiKey,
                 orgId,
                 modelId,
+                baseUrl,
                 HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
                 serviceProvider.GetService<ILoggerFactory>()));
 
@@ -146,6 +148,7 @@ public static class OpenAIKernelBuilderExtensions
         string modelId,
         string apiKey,
         string? orgId = null,
+        string? baseUrl = null,
         string? serviceId = null,
         HttpClient? httpClient = null)
     {
@@ -158,6 +161,7 @@ public static class OpenAIKernelBuilderExtensions
                 modelId,
                 apiKey,
                 orgId,
+                baseUrl,
                 HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
                 serviceProvider.GetService<ILoggerFactory>()));
 

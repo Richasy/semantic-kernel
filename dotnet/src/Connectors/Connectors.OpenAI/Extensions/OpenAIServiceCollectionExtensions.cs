@@ -100,6 +100,7 @@ public static class OpenAIServiceCollectionExtensions
         string apiKey,
         string? orgId = null,
         string? modelId = null,
+        string? proxyUrl = null,
         string? serviceId = null)
     {
         Verify.NotNull(services);
@@ -110,6 +111,7 @@ public static class OpenAIServiceCollectionExtensions
                 apiKey,
                 orgId,
                 modelId,
+                proxyUrl,
                 HttpClientProvider.GetHttpClient(serviceProvider),
                 serviceProvider.GetService<ILoggerFactory>()));
     }
@@ -132,6 +134,7 @@ public static class OpenAIServiceCollectionExtensions
         string modelId,
         string apiKey,
         string? orgId = null,
+        string? baseUrl = null,
         string? serviceId = null)
     {
         Verify.NotNull(services);
@@ -143,6 +146,7 @@ public static class OpenAIServiceCollectionExtensions
                 modelId,
                 apiKey,
                 orgId,
+                baseUrl,
                 HttpClientProvider.GetHttpClient(serviceProvider),
                 serviceProvider.GetService<ILoggerFactory>()));
     }

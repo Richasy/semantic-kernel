@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
@@ -42,11 +43,13 @@ public sealed class OpenAITextToAudioService : ITextToAudioService
         string modelId,
         string apiKey,
         string? organization = null,
+        string? baseUrl = null,
         HttpClient? httpClient = null,
         ILoggerFactory? loggerFactory = null)
     {
         Verify.NotNullOrWhiteSpace(modelId, nameof(modelId));
-        this._client = new(modelId, apiKey, organization, null, httpClient, loggerFactory?.CreateLogger(typeof(OpenAITextToAudioService)));
+        var endpoint = string.IsNullOrEmpty(baseUrl) ? null : new Uri(baseUrl);
+        this._client = new(modelId, apiKey, organization, endpoint, httpClient, loggerFactory?.CreateLogger(typeof(OpenAITextToAudioService)));
     }
 
     /// <inheritdoc/>

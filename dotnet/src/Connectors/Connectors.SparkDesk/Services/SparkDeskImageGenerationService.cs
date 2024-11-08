@@ -52,4 +52,9 @@ internal class SparkDeskImageGenerationService : ITextToImageService
     {
         return this._imageGenerationClient.GenerateImageAsync(description, new SparkDeskDrawExecutionSettings { Width = width, Height = height }, cancellationToken);
     }
+
+    public Task<IReadOnlyList<ImageContent>> GetImageContentsAsync(TextContent input, PromptExecutionSettings? executionSettings = null, Kernel? kernel = null, CancellationToken cancellationToken = default)
+    {
+        throw new System.NotImplementedException();
+    }
 }

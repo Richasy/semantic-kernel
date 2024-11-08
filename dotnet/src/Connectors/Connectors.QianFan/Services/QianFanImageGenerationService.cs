@@ -58,4 +58,9 @@ public sealed class QianFanImageGenerationService : ITextToImageService
     {
         return this._imageGenerationClient.GenerateImageAsync(description, new QianFanDrawExecutionSettings { Width = width, Height = height }, kernel, cancellationToken);
     }
+
+    public Task<IReadOnlyList<ImageContent>> GetImageContentsAsync(TextContent input, PromptExecutionSettings? executionSettings = null, Kernel? kernel = null, CancellationToken cancellationToken = default)
+    {
+        throw new System.NotImplementedException();
+    }
 }

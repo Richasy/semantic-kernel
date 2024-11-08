@@ -65,4 +65,10 @@ public sealed class HunYuanImageGenerationService : ITextToImageService
     {
         return this._imageGenerationClient.GenerateImageAsync(description, new HunYuanDrawExecutionSettings { Width = width, Height = height }, kernel, cancellationToken);
     }
+
+    /// <inheritdoc/>
+    public Task<IReadOnlyList<ImageContent>> GetImageContentsAsync(TextContent input, PromptExecutionSettings? executionSettings = null, Kernel? kernel = null, CancellationToken cancellationToken = default)
+    {
+        throw new System.NotImplementedException();
+    }
 }

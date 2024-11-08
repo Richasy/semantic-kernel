@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using System.ClientModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
-using Azure;
 using Azure.AI.OpenAI;
 using Azure.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,6 +38,7 @@ public static class AzureOpenAIKernelBuilderExtensions
     /// <param name="serviceId">A local identifier for the given AI service</param>
     /// <param name="modelId">Model identifier, see https://learn.microsoft.com/azure/cognitive-services/openai/quickstart</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
+    /// <param name="apiVersion">Optional Azure OpenAI API version, see available here <see cref="AzureOpenAIClientOptions.ServiceVersion"/></param>
     /// <returns>The same instance as <paramref name="builder"/>.</returns>
     public static IKernelBuilder AddAzureOpenAIChatCompletion(
         this IKernelBuilder builder,
@@ -47,7 +48,7 @@ public static class AzureOpenAIKernelBuilderExtensions
         string? serviceId = null,
         string? modelId = null,
         HttpClient? httpClient = null,
-        AzureOpenAIClientOptions.ServiceVersion? serviceVersion = null)
+        string? apiVersion = null)
     {
         Verify.NotNull(builder);
         Verify.NotNullOrWhiteSpace(endpoint);
@@ -57,9 +58,8 @@ public static class AzureOpenAIKernelBuilderExtensions
         {
             AzureOpenAIClient client = CreateAzureOpenAIClient(
                 endpoint,
-                new AzureKeyCredential(apiKey),
-                HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
-                serviceVersion);
+                new ApiKeyCredential(apiKey),
+                HttpClientProvider.GetHttpClient(httpClient, serviceProvider), apiVersion);
 
             return new(deploymentName, client, modelId, serviceProvider.GetService<ILoggerFactory>());
         };
@@ -80,6 +80,7 @@ public static class AzureOpenAIKernelBuilderExtensions
     /// <param name="serviceId">A local identifier for the given AI service</param>
     /// <param name="modelId">Model identifier, see https://learn.microsoft.com/azure/cognitive-services/openai/quickstart</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
+    /// <param name="apiVersion">Optional Azure OpenAI API version, see available here <see cref="AzureOpenAIClientOptions.ServiceVersion"/></param>
     /// <returns>The same instance as <paramref name="builder"/>.</returns>
     public static IKernelBuilder AddAzureOpenAIChatCompletion(
         this IKernelBuilder builder,
@@ -88,7 +89,8 @@ public static class AzureOpenAIKernelBuilderExtensions
         TokenCredential credentials,
         string? serviceId = null,
         string? modelId = null,
-        HttpClient? httpClient = null)
+        HttpClient? httpClient = null,
+        string? apiVersion = null)
     {
         Verify.NotNull(builder);
         Verify.NotNullOrWhiteSpace(endpoint);
@@ -99,7 +101,7 @@ public static class AzureOpenAIKernelBuilderExtensions
             AzureOpenAIClient client = CreateAzureOpenAIClient(
                 endpoint,
                 credentials,
-                HttpClientProvider.GetHttpClient(httpClient, serviceProvider));
+                HttpClientProvider.GetHttpClient(httpClient, serviceProvider), apiVersion);
 
             return new(deploymentName, client, modelId, serviceProvider.GetService<ILoggerFactory>());
         };
@@ -153,6 +155,7 @@ public static class AzureOpenAIKernelBuilderExtensions
     /// <param name="modelId">Model identifier, see https://learn.microsoft.com/azure/cognitive-services/openai/quickstart</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
     /// <param name="dimensions">The number of dimensions the resulting output embeddings should have. Only supported in "text-embedding-3" and later models.</param>
+    /// <param name="apiVersion">Optional Azure OpenAI API version, see available here <see cref="AzureOpenAIClientOptions.ServiceVersion"/></param>
     /// <returns>The same instance as <paramref name="builder"/>.</returns>
     [Experimental("SKEXP0010")]
     public static IKernelBuilder AddAzureOpenAITextEmbeddingGeneration(
@@ -163,7 +166,8 @@ public static class AzureOpenAIKernelBuilderExtensions
         string? serviceId = null,
         string? modelId = null,
         HttpClient? httpClient = null,
-        int? dimensions = null)
+        int? dimensions = null,
+        string? apiVersion = null)
     {
         Verify.NotNull(builder);
 
@@ -175,7 +179,8 @@ public static class AzureOpenAIKernelBuilderExtensions
                 modelId,
                 HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
                 serviceProvider.GetService<ILoggerFactory>(),
-                dimensions));
+                dimensions,
+                apiVersion));
 
         return builder;
     }
@@ -191,6 +196,7 @@ public static class AzureOpenAIKernelBuilderExtensions
     /// <param name="modelId">Model identifier, see https://learn.microsoft.com/azure/cognitive-services/openai/quickstart</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
     /// <param name="dimensions">The number of dimensions the resulting output embeddings should have. Only supported in "text-embedding-3" and later models.</param>
+    /// <param name="apiVersion">Optional Azure OpenAI API version, see available here <see cref="AzureOpenAIClientOptions.ServiceVersion"/></param>
     /// <returns>The same instance as <paramref name="builder"/>.</returns>
     [Experimental("SKEXP0010")]
     public static IKernelBuilder AddAzureOpenAITextEmbeddingGeneration(
@@ -201,7 +207,8 @@ public static class AzureOpenAIKernelBuilderExtensions
         string? serviceId = null,
         string? modelId = null,
         HttpClient? httpClient = null,
-        int? dimensions = null)
+        int? dimensions = null,
+        string? apiVersion = null)
     {
         Verify.NotNull(builder);
         Verify.NotNull(credential);
@@ -214,7 +221,8 @@ public static class AzureOpenAIKernelBuilderExtensions
                 modelId,
                 HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
                 serviceProvider.GetService<ILoggerFactory>(),
-                dimensions));
+                dimensions,
+                apiVersion));
 
         return builder;
     }
@@ -261,6 +269,7 @@ public static class AzureOpenAIKernelBuilderExtensions
     /// <param name="serviceId">A local identifier for the given AI service</param>
     /// <param name="modelId">Model identifier, see https://learn.microsoft.com/azure/cognitive-services/openai/quickstart</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
+    /// <param name="apiVersion">Optional Azure OpenAI API version, see available here <see cref="AzureOpenAIClientOptions.ServiceVersion"/></param>
     /// <returns>The same instance as <paramref name="builder"/>.</returns>
     [Experimental("SKEXP0010")]
     public static IKernelBuilder AddAzureOpenAITextToAudio(
@@ -270,7 +279,8 @@ public static class AzureOpenAIKernelBuilderExtensions
         TokenCredential credential,
         string? serviceId = null,
         string? modelId = null,
-        HttpClient? httpClient = null)
+        HttpClient? httpClient = null,
+        string? apiVersion = null)
     {
         Verify.NotNull(builder);
         Verify.NotNullOrWhiteSpace(endpoint);
@@ -283,7 +293,8 @@ public static class AzureOpenAIKernelBuilderExtensions
                 credential,
                 modelId,
                 HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
-                serviceProvider.GetService<ILoggerFactory>()));
+                serviceProvider.GetService<ILoggerFactory>(),
+                apiVersion));
 
         return builder;
     }
@@ -302,6 +313,7 @@ public static class AzureOpenAIKernelBuilderExtensions
     /// <param name="serviceId">A local identifier for the given AI service</param>
     /// <param name="modelId">Model identifier, see https://learn.microsoft.com/azure/cognitive-services/openai/quickstart</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
+    /// <param name="apiVersion">Optional Azure OpenAI API version, see available here <see cref="AzureOpenAIClientOptions.ServiceVersion"/></param>
     /// <returns>The same instance as <paramref name="builder"/>.</returns>
     [Experimental("SKEXP0010")]
     public static IKernelBuilder AddAzureOpenAITextToAudio(
@@ -311,7 +323,8 @@ public static class AzureOpenAIKernelBuilderExtensions
         string apiKey,
         string? serviceId = null,
         string? modelId = null,
-        HttpClient? httpClient = null)
+        HttpClient? httpClient = null,
+        string? apiVersion = null)
     {
         Verify.NotNull(builder);
         Verify.NotNullOrWhiteSpace(endpoint);
@@ -324,7 +337,8 @@ public static class AzureOpenAIKernelBuilderExtensions
                 apiKey,
                 modelId,
                 HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
-                serviceProvider.GetService<ILoggerFactory>()));
+                serviceProvider.GetService<ILoggerFactory>(),
+                apiVersion));
 
         return builder;
     }
@@ -455,6 +469,7 @@ public static class AzureOpenAIKernelBuilderExtensions
     /// <param name="serviceId">A local identifier for the given AI service</param>
     /// <param name="modelId">Model identifier, see https://learn.microsoft.com/azure/cognitive-services/openai/quickstart</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
+    /// <param name="apiVersion">Optional Azure OpenAI API version, see available here <see cref="AzureOpenAIClientOptions.ServiceVersion"/></param>
     /// <returns>The same instance as <paramref name="builder"/>.</returns>
     [Experimental("SKEXP0010")]
     public static IKernelBuilder AddAzureOpenAIAudioToText(
@@ -465,7 +480,7 @@ public static class AzureOpenAIKernelBuilderExtensions
         string? serviceId = null,
         string? modelId = null,
         HttpClient? httpClient = null,
-        AzureOpenAIClientOptions.ServiceVersion? serviceVersion = null)
+        string? apiVersion = null)
     {
         Verify.NotNull(builder);
         Verify.NotNullOrWhiteSpace(deploymentName);
@@ -476,9 +491,10 @@ public static class AzureOpenAIKernelBuilderExtensions
         {
             AzureOpenAIClient client = CreateAzureOpenAIClient(
                 endpoint,
-                new AzureKeyCredential(apiKey),
+                new ApiKeyCredential(apiKey),
                 HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
-                serviceVersion);
+                apiVersion);
+
             return new(deploymentName, client, modelId, serviceProvider.GetService<ILoggerFactory>());
         };
 
@@ -497,6 +513,7 @@ public static class AzureOpenAIKernelBuilderExtensions
     /// <param name="serviceId">A local identifier for the given AI service</param>
     /// <param name="modelId">Model identifier, see https://learn.microsoft.com/azure/cognitive-services/openai/quickstart</param>
     /// <param name="httpClient">The HttpClient to use with this service.</param>
+    /// <param name="apiVersion">Optional Azure OpenAI API version, see available here <see cref="AzureOpenAIClientOptions.ServiceVersion"/></param>
     /// <returns>The same instance as <paramref name="builder"/>.</returns>
     [Experimental("SKEXP0010")]
     public static IKernelBuilder AddAzureOpenAIAudioToText(
@@ -506,7 +523,8 @@ public static class AzureOpenAIKernelBuilderExtensions
         TokenCredential credentials,
         string? serviceId = null,
         string? modelId = null,
-        HttpClient? httpClient = null)
+        HttpClient? httpClient = null,
+        string? apiVersion = null)
     {
         Verify.NotNull(builder);
         Verify.NotNullOrWhiteSpace(deploymentName);
@@ -518,7 +536,9 @@ public static class AzureOpenAIKernelBuilderExtensions
             AzureOpenAIClient client = CreateAzureOpenAIClient(
                 endpoint,
                 credentials,
-                HttpClientProvider.GetHttpClient(httpClient, serviceProvider));
+                HttpClientProvider.GetHttpClient(httpClient, serviceProvider),
+                apiVersion);
+
             return new(deploymentName, client, modelId, serviceProvider.GetService<ILoggerFactory>());
         };
 
@@ -557,9 +577,9 @@ public static class AzureOpenAIKernelBuilderExtensions
 
     #endregion
 
-    private static AzureOpenAIClient CreateAzureOpenAIClient(string endpoint, AzureKeyCredential credentials, HttpClient? httpClient, AzureOpenAIClientOptions.ServiceVersion? serviceVersion) =>
-        new(new Uri(endpoint), credentials, AzureClientCore.GetAzureOpenAIClientOptions(httpClient, serviceVersion));
+    private static AzureOpenAIClient CreateAzureOpenAIClient(string endpoint, ApiKeyCredential credentials, HttpClient? httpClient, string? apiVersion) =>
+        new(new Uri(endpoint), credentials, AzureClientCore.GetAzureOpenAIClientOptions(httpClient, apiVersion));
 
-    private static AzureOpenAIClient CreateAzureOpenAIClient(string endpoint, TokenCredential credentials, HttpClient? httpClient) =>
-        new(new Uri(endpoint), credentials, AzureClientCore.GetAzureOpenAIClientOptions(httpClient));
+    private static AzureOpenAIClient CreateAzureOpenAIClient(string endpoint, TokenCredential credentials, HttpClient? httpClient, string? apiVersion) =>
+        new(new Uri(endpoint), credentials, AzureClientCore.GetAzureOpenAIClientOptions(httpClient, apiVersion));
 }

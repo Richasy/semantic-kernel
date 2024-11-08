@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AssemblyName>GettingStartedWithProcesses</AssemblyName>
@@ -37,15 +37,16 @@
   <Import Project="$(RepoRoot)/dotnet/src/InternalUtilities/samples/SamplesInternalUtilities.props" />
 
   <ItemGroup>
-    <ProjectReference
-      Include="..\..\src\Connectors\Connectors.AzureOpenAI\Connectors.AzureOpenAI.csproj" />
-    <ProjectReference
-      Include="..\..\src\Experimental\Process.Abstractions\Process.Abstractions.csproj" />
+    <Compile Include="$(RepoRoot)/dotnet/src/InternalUtilities/src/Schema/*.cs" Link="%(RecursiveDir)/InternalUtilities/Schema/%(Filename)%(Extension)" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Agents\Core\Agents.Core.csproj" />
+    <ProjectReference Include="..\..\src\Connectors\Connectors.AzureOpenAI\Connectors.AzureOpenAI.csproj" />
+    <ProjectReference Include="..\..\src\Experimental\Process.Abstractions\Process.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Experimental\Process.Core\Process.Core.csproj" />
-    <ProjectReference
-      Include="..\..\src\Experimental\Process.LocalRuntime\Process.LocalRuntime.csproj" />
-    <ProjectReference
-      Include="..\..\src\SemanticKernel.Abstractions\SemanticKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Experimental\Process.LocalRuntime\Process.LocalRuntime.csproj" />
+    <ProjectReference Include="..\..\src\SemanticKernel.Abstractions\SemanticKernel.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\SemanticKernel.Core\SemanticKernel.Core.csproj" />
   </ItemGroup>
 

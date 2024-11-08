@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json.Serialization;
 
@@ -10,6 +11,7 @@ namespace Microsoft.SemanticKernel;
 /// Represents a <see cref="FunctionChoiceBehavior"/> that provides either all of the <see cref="Kernel"/>'s plugins' functions to AI model to call or specified ones.
 /// This behavior allows the model to decide whether to call the functions and, if so, which ones to call.
 /// </summary>
+[Experimental("SKEXP0001")]
 public sealed class AutoFunctionChoiceBehavior : FunctionChoiceBehavior
 {
     /// <summary>
@@ -21,7 +23,7 @@ public sealed class AutoFunctionChoiceBehavior : FunctionChoiceBehavior
     /// Initializes a new instance of the <see cref="AutoFunctionChoiceBehavior"/> class.
     /// </summary>
     [JsonConstructor]
-    public AutoFunctionChoiceBehavior()
+    internal AutoFunctionChoiceBehavior()
     {
     }
 
@@ -36,7 +38,7 @@ public sealed class AutoFunctionChoiceBehavior : FunctionChoiceBehavior
     /// Indicates whether the functions should be automatically invoked by AI connectors.
     /// </param>
     /// <param name="options">The behavior options.</param>
-    public AutoFunctionChoiceBehavior(IEnumerable<KernelFunction>? functions = null, bool autoInvoke = true, FunctionChoiceBehaviorOptions? options = null) : base(functions)
+    internal AutoFunctionChoiceBehavior(IEnumerable<KernelFunction>? functions = null, bool autoInvoke = true, FunctionChoiceBehaviorOptions? options = null) : base(functions)
     {
         this.Functions = functions?.Select(f => FunctionName.ToFullyQualifiedName(f.Name, f.PluginName, FunctionNameSeparator)).ToList();
         this._autoInvoke = autoInvoke;
@@ -49,7 +51,9 @@ public sealed class AutoFunctionChoiceBehavior : FunctionChoiceBehavior
     /// If empty, no functions are provided to the model, which is equivalent to disabling function calling.
     /// </summary>
     [JsonPropertyName("functions")]
+#pragma warning disable CA1721 // Property names should not match get methods. Both Functions property and GetFunctions method are needed.
     public IList<string>? Functions { get; set; }
+#pragma warning restore CA1721 // Property names should not match get methods. Both Functions property and GetFunctions method are needed.
 
     /// <summary>
     /// The behavior options.

@@ -65,6 +65,11 @@ internal sealed class EdgeClient
                         }
                     }
                 }
+                else if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    taskCompletionSource.SetException(new KernelException("Edge speech connection closed."));
+                    break;
+                }
             }
         });
 
@@ -104,7 +109,7 @@ internal sealed class EdgeClient
 
     private static string ConvertToSsmlText(string lang, string voice, double speed, string text)
     {
-        return $"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis'  xml:lang='{lang}'><voice name='{voice}'><prosody pitch='+0Hz' rate ='{FromatPercentage(speed)}'>{text}</prosody></voice></speak>";
+        return $"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='{lang}'><voice name='{voice}'><prosody pitch='+0Hz' rate ='{FromatPercentage(speed)}'>{text}</prosody></voice></speak>";
     }
 
     private static string ConvertToAudioFormatWebSocketString(string outputformat)

@@ -124,6 +124,6 @@ internal sealed class EdgeClient
 
     private static string FromatPercentage(double input)
     {
-        return input < 0 ? input.ToString("+#;-#;0") + "%" : input.ToString("+#;-#;0") + "%";
+        return (input - 1).ToString("P0");
     }
 }
